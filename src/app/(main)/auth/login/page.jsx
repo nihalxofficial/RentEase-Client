@@ -79,7 +79,7 @@ export default function LoginPage() {
             {/* Background Image */}
             <div className="absolute inset-0">
               <Image
-                src={authImage}
+                src="https://media.istockphoto.com/id/511061090/photo/business-office-building-in-london-england.jpg?s=612x612&w=0&k=20&c=nYAn4JKoCqO1hMTjZiND1PAIWoABuy1BwH1MhaEoG6w="
                 alt="Login"
                 fill
                 className="object-cover"
@@ -118,7 +118,7 @@ export default function LoginPage() {
               >
                 Welcome Back
                 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-300">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-blue-400">
                   To RentEase
                 </span>
               </motion.h2>
