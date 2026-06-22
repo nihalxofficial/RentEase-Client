@@ -17,6 +17,13 @@ import {
   Star,
   PlayCircle,
 } from "lucide-react";
+import {
+  Label,
+  ListBox,
+  Select,
+  Input,
+  Button,
+} from "@heroui/react";
 
 // ==================== HERO BANNER COMPONENT ====================
 export default function HeroBanner({
@@ -39,15 +46,29 @@ export default function HeroBanner({
   secondaryButtonText = "Watch Video",
   secondaryButtonLink = "#",
 }) {
+  // Form state
   const [searchLocation, setSearchLocation] = useState("");
   const [propertyType, setPropertyType] = useState("all");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
 
+  // Handle search submission
   const handleSearch = (e) => {
     e.preventDefault();
     console.log("Searching:", { searchLocation, propertyType, minPrice, maxPrice });
+    // Add your search logic here
   };
+
+  // Property type options
+  const propertyTypes = [
+    { id: "all", label: "All Types" },
+    { id: "apartment", label: "Apartment" },
+    { id: "house", label: "House" },
+    { id: "villa", label: "Villa" },
+    { id: "studio", label: "Studio" },
+    { id: "condo", label: "Condo" },
+    { id: "townhouse", label: "Townhouse" },
+  ];
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -87,7 +108,7 @@ export default function HeroBanner({
           >
             {/* Trust Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/30 backdrop-blur-sm rounded-full border border-white/30">
-              <Shield className="w-4 h-4 text-yellow-300" strokeWidth={2} />
+              <Shield className="w-4 h-4 text-blue-300" strokeWidth={2} />
               <span className="text-sm font-medium text-white">
                 Trusted by 10,000+ Users
               </span>
@@ -96,8 +117,8 @@ export default function HeroBanner({
             {/* Title */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight drop-shadow-lg">
               {title}
-              <span className="block text-yellow-300 mt-2">
-                Today
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-blue-200 to-white mt-2 drop-shadow-lg">
+                With trust
               </span>
             </h1>
 
@@ -193,7 +214,7 @@ export default function HeroBanner({
           )}
         </div>
 
-        {/* ========== SEARCH BAR ========== */}
+        {/* ========== SEARCH BAR WITH HEROUIV3 ========== */}
         {showSearch && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -203,91 +224,120 @@ export default function HeroBanner({
           >
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Location */}
+                {/* Location Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
+                  <Label className="block text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1.5">
                     <MapPin className="inline w-3.5 h-3.5 mr-1" strokeWidth={2} />
                     Location
-                  </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={2} />
-                    <input
-                      type="text"
-                      placeholder="City, Area"
-                      value={searchLocation}
-                      onChange={(e) => setSearchLocation(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
-                    />
-                  </div>
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder="City, Area"
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
+                    startContent={<MapPin className="w-4 h-4 text-blue-400" strokeWidth={2} />}
+                    className="w-full"
+                    classNames={{
+                      input: "bg-transparent text-gray-800 placeholder:text-gray-400",
+                      inputWrapper: "bg-white border-2 border-blue-200/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+                    }}
+                  />
                 </div>
 
-                {/* Property Type */}
+                {/* Property Type Select */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
+                  <Label className="block text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1.5">
                     <Building2 className="inline w-3.5 h-3.5 mr-1" strokeWidth={2} />
                     Property Type
-                  </label>
-                  <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={2} />
-                    <select
-                      value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 appearance-none"
-                    >
-                      <option value="all">All Types</option>
-                      <option value="apartment">Apartment</option>
-                      <option value="house">House</option>
-                      <option value="villa">Villa</option>
-                      <option value="studio">Studio</option>
-                    </select>
-                  </div>
+                  </Label>
+                  <Select
+                    className="w-full"
+                    placeholder="All Types"
+                    selectedKeys={propertyType ? [propertyType] : []}
+                    onSelectionChange={(keys) => {
+                      const selected = Array.from(keys)[0];
+                      setPropertyType(selected || "all");
+                    }}
+                    variant="primary"
+                    classNames={{
+                      trigger: "bg-white border-2 border-blue-200/50 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 shadow-sm hover:border-blue-300 data-[open=true]:border-blue-500",
+                      value: "text-gray-800 placeholder:text-gray-400",
+                      indicator: "text-blue-400",
+                      popover: "bg-white rounded-xl shadow-lg border border-blue-100/50 mt-1",
+                      listBox: "p-1",
+                    }}
+                  >
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {propertyTypes.map((type) => (
+                          <ListBox.Item 
+                            key={type.id} 
+                            id={type.id}
+                            textValue={type.label}
+                            className="hover:bg-blue-50 rounded-lg data-[selected=true]:bg-blue-100 data-[selected=true]:text-blue-700 transition-colors text-gray-700"
+                          >
+                            {type.label}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
                 </div>
 
-                {/* Min Price */}
+                {/* Min Price Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
+                  <Label className="block text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1.5">
                     <DollarSign className="inline w-3.5 h-3.5 mr-1" strokeWidth={2} />
                     Min Price
-                  </label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={2} />
-                    <input
-                      type="number"
-                      placeholder="$0"
-                      value={minPrice}
-                      onChange={(e) => setMinPrice(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
-                    />
-                  </div>
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="$0"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    startContent={<DollarSign className="w-4 h-4 text-blue-400" strokeWidth={2} />}
+                    className="w-full"
+                    classNames={{
+                      input: "bg-transparent text-gray-800 placeholder:text-gray-400",
+                      inputWrapper: "bg-white border-2 border-blue-200/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+                    }}
+                  />
                 </div>
 
-                {/* Max Price */}
+                {/* Max Price Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">
+                  <Label className="block text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1.5">
                     <DollarSign className="inline w-3.5 h-3.5 mr-1" strokeWidth={2} />
                     Max Price
-                  </label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" strokeWidth={2} />
-                    <input
-                      type="number"
-                      placeholder="$10,000"
-                      value={maxPrice}
-                      onChange={(e) => setMaxPrice(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
-                    />
-                  </div>
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="$10,000"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    startContent={<DollarSign className="w-4 h-4 text-blue-400" strokeWidth={2} />}
+                    className="w-full"
+                    classNames={{
+                      input: "bg-transparent text-gray-800 placeholder:text-gray-400",
+                      inputWrapper: "bg-white border-2 border-blue-200/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+                    }}
+                  />
                 </div>
               </div>
 
               {/* Search Button */}
-              <button
+              <Button
                 type="submit"
                 className="w-full md:w-auto px-12 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.35)] hover:shadow-[0_8px_24px_rgba(37,99,235,0.45)] transition-all duration-300 transform hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2 mx-auto"
+                startContent={<Search className="w-5 h-5" strokeWidth={2} />}
               >
-                <Search className="w-5 h-5" strokeWidth={2} />
-                <span>Search Properties</span>
-              </button>
+                Search Properties
+              </Button>
             </form>
           </motion.div>
         )}
