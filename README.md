@@ -12,6 +12,9 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 - React Icons
 - Lucide React
 - Marquee
+- Better Auth
+- MongoDB
+- MongoDB Atlas
 
 First, run the development server:
 
