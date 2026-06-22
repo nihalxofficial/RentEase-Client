@@ -1,6 +1,7 @@
 import CustomerReviews from "@/components/homepage/CustomerReviews";
 import FeaturedProperties from "@/components/homepage/FeaturedProperties";
 import HeroBanner from "@/components/homepage/HeroBanner";
+import HowItWorks from "@/components/homepage/HowItWorks";
 import TopLocations from "@/components/homepage/TopLocations";
 import WhyChooseUs from "@/components/homepage/WhyChooseUs";
 import Image from "next/image";
@@ -13,6 +14,7 @@ export default function Home() {
       <WhyChooseUs/>
       <CustomerReviews/>
       <TopLocations/>
+      <HowItWorks/>
     </div>
   );
 }
