@@ -11,6 +11,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 - Gravity Ui Icons
 - React Icons
 - Lucide React
+- Marquee
 
 First, run the development server:
 

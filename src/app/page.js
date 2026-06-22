@@ -1,3 +1,4 @@
+import CustomerReviews from "@/components/homepage/CustomerReviews";
 import FeaturedProperties from "@/components/homepage/FeaturedProperties";
 import HeroBanner from "@/components/homepage/HeroBanner";
 import WhyChooseUs from "@/components/homepage/WhyChooseUs";
@@ -9,6 +10,7 @@ export default function Home() {
       <HeroBanner/>
       <FeaturedProperties/>
       <WhyChooseUs/>
+      <CustomerReviews/>
     </div>
   );
 }
