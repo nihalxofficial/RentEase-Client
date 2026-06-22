@@ -141,14 +141,14 @@ export default function Navbar() {
               {!isLoggedIn ? (
                 <>
                   <Link
-                    href="/login"
+                    href="/auth/login"
                     className="hidden md:flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_24px_rgba(37,99,235,0.4)] transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
                   >
                     <User className="w-4 h-4" strokeWidth={2.2} />
                     <span>Login</span>
                   </Link>
                   <Link
-                    href="/register"
+                    href="/auth/register"
                     className="hidden md:flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-blue-700 bg-white border-2 border-blue-600/30 rounded-xl hover:border-blue-600 hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 hover:text-white hover:shadow-[0_4px_16px_rgba(37,99,235,0.25)] transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
                   >
                     <UserPlus className="w-4 h-4" strokeWidth={2.2} />
@@ -282,7 +282,7 @@ export default function Navbar() {
                 {!isLoggedIn ? (
                   <>
                     <Link
-                      href="/login"
+                      href="/auth/login"
                       className="flex items-center justify-center gap-2.5 w-full px-4 py-3.5 font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.3)] transition-all duration-200 active:scale-[0.98]"
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -290,7 +290,7 @@ export default function Navbar() {
                       <span>Login</span>
                     </Link>
                     <Link
-                      href="/register"
+                      href="/auth/register"
                       className="flex items-center justify-center gap-2.5 w-full px-4 py-3.5 font-semibold text-blue-700 bg-white border-2 border-blue-600/30 rounded-xl hover:border-blue-600 hover:bg-gradient-to-r hover:from-blue-600 hover:to-blue-700 hover:text-white transition-all duration-200 active:scale-[0.98]"
                       onClick={() => setIsMenuOpen(false)}
                     >

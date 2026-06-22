@@ -1,4 +1,3 @@
-// src/app/contact/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -185,7 +184,7 @@ export default function ContactPage() {
               Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">Touch</span>
             </h1>
             <p className="text-gray-500 mt-4 text-lg max-w-2xl mx-auto">
-              Have questions about RentEase? We're here to help. Reach out to us anytime.
+              Have questions about RentEase? We&apos;re here to help. Reach out to us anytime.
             </p>
           </motion.div>
         </div>
@@ -303,7 +302,7 @@ export default function ContactPage() {
                 </span>
               </div>
               <h2 className="text-3xl font-extrabold text-gray-900 mb-4">
-                We'd Love to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">Hear From You</span>
+                We&apos;d Love to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">Hear From You</span>
               </h2>
               <p className="text-gray-500 mb-6">
                 Fill out the form below and our team will get back to you within 24 hours.
@@ -322,7 +321,7 @@ export default function ContactPage() {
                     Message Sent Successfully!
                   </h3>
                   <p className="text-emerald-600/70 text-sm">
-                    Thank you for reaching out. We'll respond within 24 hours.
+                    Thank you for reaching out. We&apos;ll respond within 24 hours.
                   </p>
                 </motion.div>
               ) : (
@@ -513,7 +512,7 @@ export default function ContactPage() {
             className="bg-gray-50/50 rounded-3xl p-8 md:p-12 border-2 border-blue-100/50 shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-center"
           >
             <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              Can't Find What You're Looking For?
+              Can&apos;t Find What You&apos;re Looking For?
             </h3>
             <p className="text-gray-500 max-w-2xl mx-auto mb-6">
               Check our FAQ section for answers to common questions or reach out to our support team.
