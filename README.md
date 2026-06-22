@@ -16,6 +16,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 - MongoDB
 - MongoDB Atlas
 - React Toast
+- Recharts
 
 First, run the development server:
 

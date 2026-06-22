@@ -1,4 +1,3 @@
-// src/components/shared/Navbar.jsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -278,7 +277,7 @@ export default function Navbar() {
                           <span>Profile</span>
                         </Link>
                         <Link
-                          href="/dashboard"
+                          href={`/dashboard/${user?.role}`}
                           className="flex items-center gap-3.5 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
                           onClick={() => setIsDropdownOpen(false)}
                         >
