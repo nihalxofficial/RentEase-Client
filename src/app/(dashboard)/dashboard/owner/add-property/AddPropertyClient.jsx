@@ -48,9 +48,10 @@ import {
   Star,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { addProperty } from "@/lib/action/properties";
 
 // ==================== ADD PROPERTY PAGE ====================
-export default function AddPropertyClient() {
+export default function AddPropertyClient({owner}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [mainImage, setMainImage] = useState(null);
@@ -221,6 +222,7 @@ export default function AddPropertyClient() {
     // Combine with state data
     const propertyData = {
       ...data,
+      ownerId: owner?.id,
       amenities: formData.amenities,
       mainImage: mainImage.url,
       images: secondaryImages.map((img) => img.url),
@@ -231,14 +233,16 @@ export default function AddPropertyClient() {
       propertySize: parseFloat(data.propertySize),
     };
 
-    console.log("Property Data:", propertyData);
+    const result = await addProperty(propertyData)
+    if(result.insertedId){
+      toast.success("Property added successfully!");
+    }
 
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
-
     setIsLoading(false);
-    toast.success("Property added successfully!");
-    // router.push("/dashboard/owner/properties");
+
+    router.push("/dashboard/owner/properties");
   };
 
   return (

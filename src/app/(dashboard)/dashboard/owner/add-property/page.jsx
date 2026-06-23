@@ -1,10 +1,12 @@
 import React from 'react';
 import AddPropertyClient from './AddPropertyClient';
+import { getUserSession } from '@/lib/core/session';
 
-const AddPropertyPage = () => {
+const AddPropertyPage = async() => {
+  const user = await getUserSession();
   return (
     <div>
-      <AddPropertyClient/>
+      <AddPropertyClient owner={user}/>
     </div>
   );
 };
