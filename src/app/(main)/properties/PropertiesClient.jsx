@@ -31,41 +31,35 @@ export default function PropertiesClient({ properties = [], filter }) {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
   const [wishlist, setWishlist] = useState([]);
-  // const [properties, setProperties] = useState(initialProperties);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
 
-  // ========== UI STATE (NO FILTERING LOGIC) ==========
-  const [searchTerm, setSearchTerm] = useState(filter.search);
+  // ========== UI STATE ==========
+  const [searchTerm, setSearchTerm] = useState(filter.search || "");
   const [propertyType, setPropertyType] = useState(filter.propertyType || "all");
   const [sortBy, setSortBy] = useState(filter.sortBy || "default");
 
-  const router = useRouter()
+  const router = useRouter();
 
-  useEffect(()=>{
-    const sp = new URLSearchParams()
-    if(searchTerm){
-      sp.set("search", searchTerm)
+  useEffect(() => {
+    const sp = new URLSearchParams();
+    if (searchTerm) {
+      sp.set("search", searchTerm);
     }
-
-    if(propertyType !== "all"){
-      sp.set("propertyType", propertyType)
+    if (propertyType !== "all") {
+      sp.set("propertyType", propertyType);
     }
-
-    if(sortBy !== 'default'){
-      sp.set("sortBy", sortBy)
+    if (sortBy !== "default") {
+      sp.set("sortBy", sortBy);
     }
-
     const path = `?${sp.toString()}`;
     router.push(path);
-  }, [router, searchTerm, propertyType, sortBy])
+  }, [router, searchTerm, propertyType, sortBy]);
 
   // ========== SIMULATE LOADING ==========
   useEffect(() => {
-    // Remove this after API integration - this is just for demo loading
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1500);
-    
     return () => clearTimeout(timer);
   }, []);
 
@@ -74,7 +68,6 @@ export default function PropertiesClient({ properties = [], filter }) {
     const fetchWishlist = async () => {
       try {
         // ========== AFTER API INTEGRATION: ==========
-        // Remove this localStorage code and uncomment the API call below
         // const response = await fetch('/api/wishlist');
         // const data = await response.json();
         // setWishlist(data);
@@ -94,18 +87,15 @@ export default function PropertiesClient({ properties = [], filter }) {
   const handleAddToWishlist = async (propertyId) => {
     setIsWishlistLoading(true);
     try {
-      // Optimistic update
       setWishlist((prev) => [...prev, propertyId]);
       
       // ========== AFTER API INTEGRATION: ==========
-      // Uncomment this code and remove localStorage code below
       // const response = await fetch('/api/wishlist', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({ propertyId }),
       // });
       // if (!response.ok) throw new Error('Failed to add to wishlist');
-      // const data = await response.json();
       
       // TO REMOVE AFTER API INTEGRATION ↓
       const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
@@ -114,7 +104,6 @@ export default function PropertiesClient({ properties = [], filter }) {
       
       toast.success("Added to wishlist!");
     } catch (error) {
-      // Rollback on error
       setWishlist((prev) => prev.filter((id) => id !== propertyId));
       toast.error("Failed to add to wishlist");
       console.error("Error adding to wishlist:", error);
@@ -126,16 +115,13 @@ export default function PropertiesClient({ properties = [], filter }) {
   const handleRemoveFromWishlist = async (propertyId) => {
     setIsWishlistLoading(true);
     try {
-      // Optimistic update
       setWishlist((prev) => prev.filter((id) => id !== propertyId));
       
       // ========== AFTER API INTEGRATION: ==========
-      // Uncomment this code and remove localStorage code below
       // const response = await fetch(`/api/wishlist/${propertyId}`, {
       //   method: 'DELETE',
       // });
       // if (!response.ok) throw new Error('Failed to remove from wishlist');
-      // const data = await response.json();
       
       // TO REMOVE AFTER API INTEGRATION ↓
       const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
@@ -144,7 +130,6 @@ export default function PropertiesClient({ properties = [], filter }) {
       
       toast.success("Removed from wishlist!");
     } catch (error) {
-      // Rollback on error
       setWishlist((prev) => [...prev, propertyId]);
       toast.error("Failed to remove from wishlist");
       console.error("Error removing from wishlist:", error);
@@ -189,7 +174,7 @@ export default function PropertiesClient({ properties = [], filter }) {
     return stars;
   };
 
-  // ========== PROPERTY TYPES (UI Only) ==========
+  // ========== PROPERTY TYPES ==========
   const propertyTypes = [
     { id: "all", label: "All Types" },
     { id: "apartment", label: "Apartment" },
@@ -357,7 +342,7 @@ export default function PropertiesClient({ properties = [], filter }) {
         </div>
       </section>
 
-      {/* Search & Filter Section - UI Only */}
+      {/* Search & Filter Section */}
       <section className="py-8 bg-white border-y border-gray-100/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row gap-4 items-center">
@@ -376,7 +361,7 @@ export default function PropertiesClient({ properties = [], filter }) {
               />
             </div>
 
-            {/* Property Type Select - FIXED: use value/onChange instead of selectedKeys/onSelectionChange */}
+            {/* Property Type Select */}
             <div className="relative w-full md:w-48">
               <Select
                 className="w-full"
@@ -415,7 +400,7 @@ export default function PropertiesClient({ properties = [], filter }) {
               </Select>
             </div>
 
-            {/* Sort By Select - FIXED: use value/onChange instead of selectedKeys/onSelectionChange */}
+            {/* Sort By Select */}
             <div className="relative w-full md:w-48">
               <Select
                 className="w-full"
@@ -453,32 +438,6 @@ export default function PropertiesClient({ properties = [], filter }) {
                 </Select.Popover>
               </Select>
             </div>
-
-            {/* View Toggle Buttons */}
-            <div className="flex gap-1 bg-gray-100/80 p-1 rounded-xl border border-gray-200">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-all duration-200 ${
-                  viewMode === "grid"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
-                }`}
-                aria-label="Grid view"
-              >
-                <Grid3x3 className="w-5 h-5" strokeWidth={2} />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-all duration-200 ${
-                  viewMode === "list"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
-                }`}
-                aria-label="List view"
-              >
-                <List className="w-5 h-5" strokeWidth={2} />
-              </button>
-            </div>
           </div>
         </div>
       </section>
@@ -486,14 +445,36 @@ export default function PropertiesClient({ properties = [], filter }) {
       {/* Properties Grid */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Results Count */}
+          {/* Results Count with View Toggle Buttons - Left/Right aligned */}
           <div className="flex items-center justify-between mb-6">
             <p className="text-sm text-gray-500">
               Showing <span className="font-semibold text-gray-700">{properties.length}</span> properties
             </p>
-            <span className="text-sm text-gray-400">
-              {viewMode === "grid" ? "Grid View" : "List View"}
-            </span>
+            {/* Grid/List buttons on the right side */}
+            <div className="flex gap-1 bg-gray-100/80 p-1 rounded-xl border border-gray-200">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 cursor-pointer rounded-lg transition-all duration-200 ${
+                  viewMode === "grid"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
+                }`}
+                aria-label="Grid view"
+              >
+                <Grid3x3 className="w-4 h-4" strokeWidth={2} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 cursor-pointer rounded-lg transition-all duration-200 ${
+                  viewMode === "list"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
+                }`}
+                aria-label="List view"
+              >
+                <List className="w-4 h-4" strokeWidth={2} />
+              </button>
+            </div>
           </div>
 
           {isLoading ? (
