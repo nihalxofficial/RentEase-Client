@@ -11,10 +11,10 @@ export default async function PropertiesPage({searchParams}) {
   const queryString = querySearch.toString();
   // Fetch properties from API
   // Replace this with your actual API call
-  const properties = await getProperties(queryString);
+  const {properties, total} = await getProperties(queryString);
   // console.log(properties);
 
 //   const properties = await fetchProperties();
 
-  return <PropertiesClient properties={properties} filter={filter} />;
+  return <PropertiesClient properties={properties} filter={filter} total={total} />;
 }

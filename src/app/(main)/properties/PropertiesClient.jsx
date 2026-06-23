@@ -1,4 +1,3 @@
-// src/app/(main)/properties/PropertiesClient.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -22,16 +21,36 @@ import {
   Input,
   Select,
   ListBox,
+  Pagination,
 } from "@heroui/react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 // ==================== PROPERTIES CLIENT COMPONENT ====================
-export default function PropertiesClient({ properties = [], filter }) {
+export default function PropertiesClient({ properties = [], filter, total }) {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
   const [wishlist, setWishlist] = useState([]);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const [page, setPage] = useState(parseInt(filter.page) || 1);
+
+  // ========== PAGINATION ==========
+  const itemsPerPage = 6;
+  const totalPages = Math.ceil(total / itemsPerPage);
+  const startItem = (page - 1) * itemsPerPage + 1;
+  const endItem = Math.min(page * itemsPerPage, total);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    pages.push(1);
+    if (page > 3) pages.push("ellipsis");
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (page < totalPages - 2) pages.push("ellipsis");
+    if (totalPages > 1) pages.push(totalPages);
+    return pages;
+  };
 
   // ========== UI STATE ==========
   const [searchTerm, setSearchTerm] = useState(filter.search || "");
@@ -42,24 +61,21 @@ export default function PropertiesClient({ properties = [], filter }) {
 
   useEffect(() => {
     const sp = new URLSearchParams();
-    if (searchTerm) {
-      sp.set("search", searchTerm);
-    }
-    if (propertyType !== "all") {
-      sp.set("propertyType", propertyType);
-    }
-    if (sortBy !== "default") {
-      sp.set("sortBy", sortBy);
-    }
-    const path = `?${sp.toString()}`;
-    router.push(path);
-  }, [router, searchTerm, propertyType, sortBy]);
+    if (searchTerm) sp.set("search", searchTerm);
+    if (propertyType !== "all") sp.set("propertyType", propertyType);
+    if (sortBy !== "default") sp.set("sortBy", sortBy);
+    sp.set("page", String(page));
+    sp.set("perPage", String(itemsPerPage));
+    router.push(`?${sp.toString()}`);
+  }, [searchTerm, propertyType, sortBy, page]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, propertyType, sortBy]);
 
   // ========== SIMULATE LOADING ==========
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
+    const timer = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -67,15 +83,8 @@ export default function PropertiesClient({ properties = [], filter }) {
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
-        // ========== AFTER API INTEGRATION: ==========
-        // const response = await fetch('/api/wishlist');
-        // const data = await response.json();
-        // setWishlist(data);
-        
-        // TO REMOVE AFTER API INTEGRATION ↓
         const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
         setWishlist(savedWishlist);
-        // TO REMOVE AFTER API INTEGRATION ↑
       } catch (error) {
         console.error("Error fetching wishlist:", error);
       }
@@ -88,20 +97,8 @@ export default function PropertiesClient({ properties = [], filter }) {
     setIsWishlistLoading(true);
     try {
       setWishlist((prev) => [...prev, propertyId]);
-      
-      // ========== AFTER API INTEGRATION: ==========
-      // const response = await fetch('/api/wishlist', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ propertyId }),
-      // });
-      // if (!response.ok) throw new Error('Failed to add to wishlist');
-      
-      // TO REMOVE AFTER API INTEGRATION ↓
       const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
       localStorage.setItem("wishlist", JSON.stringify([...savedWishlist, propertyId]));
-      // TO REMOVE AFTER API INTEGRATION ↑
-      
       toast.success("Added to wishlist!");
     } catch (error) {
       setWishlist((prev) => prev.filter((id) => id !== propertyId));
@@ -116,18 +113,11 @@ export default function PropertiesClient({ properties = [], filter }) {
     setIsWishlistLoading(true);
     try {
       setWishlist((prev) => prev.filter((id) => id !== propertyId));
-      
-      // ========== AFTER API INTEGRATION: ==========
-      // const response = await fetch(`/api/wishlist/${propertyId}`, {
-      //   method: 'DELETE',
-      // });
-      // if (!response.ok) throw new Error('Failed to remove from wishlist');
-      
-      // TO REMOVE AFTER API INTEGRATION ↓
       const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-      localStorage.setItem("wishlist", JSON.stringify(savedWishlist.filter((id) => id !== propertyId)));
-      // TO REMOVE AFTER API INTEGRATION ↑
-      
+      localStorage.setItem(
+        "wishlist",
+        JSON.stringify(savedWishlist.filter((id) => id !== propertyId))
+      );
       toast.success("Removed from wishlist!");
     } catch (error) {
       setWishlist((prev) => [...prev, propertyId]);
@@ -148,16 +138,13 @@ export default function PropertiesClient({ properties = [], filter }) {
   };
 
   // ========== FORMAT PRICE ==========
-  const formatPrice = (price) => {
-    return `$${price.toLocaleString()}`;
-  };
+  const formatPrice = (price) => `$${price.toLocaleString()}`;
 
   // ========== RENDER STARS ==========
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
     const stars = [];
-
     for (let i = 0; i < fullStars; i++) {
       stars.push(<Star key={`full-${i}`} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />);
     }
@@ -194,7 +181,6 @@ export default function PropertiesClient({ properties = [], filter }) {
   // ========== PROPERTY CARD COMPONENT ==========
   const PropertyCard = ({ property, isWishlisted }) => {
     const isListView = viewMode === "list";
-
     return (
       <div
         className={`group bg-white rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-400 border-2 border-gray-100/60 hover:border-blue-200/70 hover:-translate-y-2 ${
@@ -216,23 +202,15 @@ export default function PropertiesClient({ properties = [], filter }) {
 
           {/* Price Badge */}
           <div className="absolute bottom-4 right-4 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50">
-            <span className="text-lg font-bold text-blue-600">
-              {formatPrice(property.price)}
-            </span>
+            <span className="text-lg font-bold text-blue-600">{formatPrice(property.price)}</span>
             <span className="text-xs text-gray-500 ml-1">/{property.rentType}</span>
           </div>
 
           {/* Rating Badge */}
           <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
-            <div className="flex items-center gap-0.5">
-              {renderStars(property.rating)}
-            </div>
-            <span className="text-white text-sm font-medium">
-              {property.rating}
-            </span>
-            <span className="text-white/60 text-xs">
-              ({property.reviews})
-            </span>
+            <div className="flex items-center gap-0.5">{renderStars(property.rating)}</div>
+            <span className="text-white text-sm font-medium">{property.rating}</span>
+            <span className="text-white/60 text-xs">({property.reviews})</span>
           </div>
 
           {/* Wishlist Button */}
@@ -247,9 +225,7 @@ export default function PropertiesClient({ properties = [], filter }) {
           >
             <Heart
               className={`w-4 h-4 transition-all duration-300 ${
-                isWishlisted
-                  ? "fill-white text-white"
-                  : "text-gray-600 group-hover:text-rose-500"
+                isWishlisted ? "fill-white text-white" : "text-gray-600 group-hover:text-rose-500"
               }`}
               strokeWidth={2}
             />
@@ -323,7 +299,7 @@ export default function PropertiesClient({ properties = [], filter }) {
       <section className="relative pt-32 pb-20 bg-gradient-to-b from-blue-50/50 via-white to-white overflow-hidden">
         <div className="absolute top-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        
+
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50/80 backdrop-blur-sm rounded-full border border-blue-100/50 mb-4">
@@ -333,7 +309,10 @@ export default function PropertiesClient({ properties = [], filter }) {
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mt-2">
-              Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">Dream Property</span>
+              Find Your{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-700">
+                Dream Property
+              </span>
             </h1>
             <p className="text-gray-500 mt-4 text-lg max-w-2xl mx-auto">
               Browse through our curated selection of premium rental properties
@@ -346,23 +325,24 @@ export default function PropertiesClient({ properties = [], filter }) {
       <section className="py-8 bg-white border-y border-gray-100/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row gap-4 items-center">
-            {/* Search Input */}
-            <div className="relative flex-1 w-full">
+            {/* Search Input - With visible search icon */}
+            <div className="w-full md:flex-1">
               <Input
                 placeholder="Search by location, property title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                startContent={<Search className="w-4 h-4 text-gray-400" strokeWidth={2} />}
+                startContent={<Search className="w-4 h-4 text-blue-500" strokeWidth={2} />}
                 className="w-full"
                 classNames={{
                   input: "bg-transparent text-gray-800 placeholder:text-gray-400",
-                  inputWrapper: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+                  inputWrapper:
+                    "bg-white border-2 border-blue-200/60 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
                 }}
               />
             </div>
 
             {/* Property Type Select */}
-            <div className="relative w-full md:w-48">
+            <div className="w-full md:w-48">
               <Select
                 className="w-full"
                 placeholder="All Types"
@@ -370,7 +350,8 @@ export default function PropertiesClient({ properties = [], filter }) {
                 onChange={(value) => setPropertyType(value ?? "all")}
                 aria-label="Property Type"
                 classNames={{
-                  trigger: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all duration-200 shadow-sm hover:border-blue-300 data-[open=true]:border-blue-500",
+                  trigger:
+                    "bg-white border-2 border-blue-200/60 rounded-xl focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all duration-200 shadow-sm hover:border-blue-300 data-[open=true]:border-blue-500",
                   value: "text-gray-800",
                   placeholder: "text-gray-400",
                   indicator: "text-blue-400",
@@ -401,7 +382,7 @@ export default function PropertiesClient({ properties = [], filter }) {
             </div>
 
             {/* Sort By Select */}
-            <div className="relative w-full md:w-48">
+            <div className="w-full md:w-48">
               <Select
                 className="w-full"
                 placeholder="Default"
@@ -409,7 +390,8 @@ export default function PropertiesClient({ properties = [], filter }) {
                 onChange={(value) => setSortBy(value ?? "default")}
                 aria-label="Sort By"
                 classNames={{
-                  trigger: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all duration-200 shadow-sm hover:border-blue-300 data-[open=true]:border-blue-500",
+                  trigger:
+                    "bg-white border-2 border-blue-200/60 rounded-xl focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all duration-200 shadow-sm hover:border-blue-300 data-[open=true]:border-blue-500",
                   value: "text-gray-800",
                   placeholder: "text-gray-400",
                   indicator: "text-blue-400",
@@ -445,12 +427,11 @@ export default function PropertiesClient({ properties = [], filter }) {
       {/* Properties Grid */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Results Count with View Toggle Buttons - Left/Right aligned */}
+          {/* Results Count with View Toggle */}
           <div className="flex items-center justify-between mb-6">
             <p className="text-sm text-gray-500">
               Showing <span className="font-semibold text-gray-700">{properties.length}</span> properties
             </p>
-            {/* Grid/List buttons on the right side */}
             <div className="flex gap-1 bg-gray-100/80 p-1 rounded-xl border border-gray-200">
               <button
                 onClick={() => setViewMode("grid")}
@@ -478,7 +459,6 @@ export default function PropertiesClient({ properties = [], filter }) {
           </div>
 
           {isLoading ? (
-            // ========== FIRST PAGE LOADING ANIMATION ==========
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((item) => (
                 <div key={item} className="bg-white rounded-2xl overflow-hidden border-2 border-gray-100/60 animate-pulse">
@@ -508,20 +488,67 @@ export default function PropertiesClient({ properties = [], filter }) {
               <p className="text-gray-500">Try adjusting your search or filter criteria</p>
             </div>
           ) : (
-            <div
-              className={viewMode === "grid" 
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                : "space-y-6"
-              }
-            >
-              {properties.map((property) => (
-                <PropertyCard
-                  key={property._id}
-                  property={property}
-                  isWishlisted={wishlist.includes(property._id)}
-                />
-              ))}
-            </div>
+            <>
+              <div
+                className={
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    : "space-y-6"
+                }
+              >
+                {properties.map((property) => (
+                  <PropertyCard
+                    key={property._id}
+                    property={property}
+                    isWishlisted={wishlist.includes(property._id)}
+                  />
+                ))}
+              </div>
+
+              {/* ========== PAGINATION ========== */}
+              {totalPages > 1 && (
+                <div className="mt-12">
+                  <Pagination className="w-full">
+                    <Pagination.Summary>
+                      Showing {startItem}–{endItem} of {total} results
+                    </Pagination.Summary>
+                    <Pagination.Content>
+                      <Pagination.Item>
+                        <Pagination.Previous
+                          isDisabled={page === 1}
+                          onPress={() => setPage((p) => p - 1)}
+                        >
+                          <Pagination.PreviousIcon />
+                          <span>Previous</span>
+                        </Pagination.Previous>
+                      </Pagination.Item>
+                      {getPageNumbers().map((p, i) =>
+                        p === "ellipsis" ? (
+                          <Pagination.Item key={`ellipsis-${i}`}>
+                            <Pagination.Ellipsis />
+                          </Pagination.Item>
+                        ) : (
+                          <Pagination.Item key={p}>
+                            <Pagination.Link isActive={p === page} onPress={() => setPage(p)}>
+                              {p}
+                            </Pagination.Link>
+                          </Pagination.Item>
+                        )
+                      )}
+                      <Pagination.Item>
+                        <Pagination.Next
+                          isDisabled={page === totalPages}
+                          onPress={() => setPage((p) => p + 1)}
+                        >
+                          <span>Next</span>
+                          <Pagination.NextIcon />
+                        </Pagination.Next>
+                      </Pagination.Item>
+                    </Pagination.Content>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
