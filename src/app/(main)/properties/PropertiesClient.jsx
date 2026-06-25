@@ -30,12 +30,13 @@ import {
 } from "@heroui/react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { addToWishlist, removeWishlist } from "@/lib/action/wishlist";
 
 // ==================== PROPERTIES CLIENT COMPONENT ====================
-export default function PropertiesClient({ properties = [], filter, total }) {
+export default function PropertiesClient({ properties = [], filter, total, tenant, initialWishlist = [] }) {
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useState(initialWishlist);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [page, setPage] = useState(parseInt(filter.page) || 1);
 
@@ -84,31 +85,15 @@ export default function PropertiesClient({ properties = [], filter, total }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // ========== FETCH USER WISHLIST ==========
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      try {
-        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        setWishlist(savedWishlist);
-      } catch (error) {
-        console.error("Error fetching wishlist:", error);
-      }
-    };
-    fetchWishlist();
-  }, []);
-
   // ========== WISHLIST HANDLERS ==========
   const handleAddToWishlist = async (propertyId) => {
     setIsWishlistLoading(true);
     try {
+      await addToWishlist({ propertyId, tenantId: tenant?.id });
       setWishlist((prev) => [...prev, propertyId]);
-      const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-      localStorage.setItem("wishlist", JSON.stringify([...savedWishlist, propertyId]));
       toast.success("Added to wishlist!");
     } catch (error) {
-      setWishlist((prev) => prev.filter((id) => id !== propertyId));
       toast.error("Failed to add to wishlist");
-      console.error("Error adding to wishlist:", error);
     } finally {
       setIsWishlistLoading(false);
     }
@@ -117,17 +102,11 @@ export default function PropertiesClient({ properties = [], filter, total }) {
   const handleRemoveFromWishlist = async (propertyId) => {
     setIsWishlistLoading(true);
     try {
+      await removeWishlist(propertyId, tenant?.id);
       setWishlist((prev) => prev.filter((id) => id !== propertyId));
-      const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-      localStorage.setItem(
-        "wishlist",
-        JSON.stringify(savedWishlist.filter((id) => id !== propertyId))
-      );
       toast.success("Removed from wishlist!");
     } catch (error) {
-      setWishlist((prev) => [...prev, propertyId]);
       toast.error("Failed to remove from wishlist");
-      console.error("Error removing from wishlist:", error);
     } finally {
       setIsWishlistLoading(false);
     }
@@ -215,7 +194,6 @@ export default function PropertiesClient({ properties = [], filter, total }) {
     const typeColor = getPropertyTypeColor(property.propertyType);
     const typeLabel = propertyTypes.find(t => t.id === property.propertyType)?.label || property.propertyType;
 
-    // Use the rating and reviewCount from the API
     const rating = property.rating || 0;
     const reviewCount = property.reviewCount || 0;
 
@@ -249,7 +227,7 @@ export default function PropertiesClient({ properties = [], filter, total }) {
             <span className="text-xs text-gray-500 ml-1">/{property.rentType}</span>
           </div>
 
-          {/* Rating Badge - Only on image */}
+          {/* Rating Badge */}
           {reviewCount > 0 ? (
             <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
               <div className="flex items-center gap-0.5">{renderStars(rating)}</div>
@@ -272,7 +250,7 @@ export default function PropertiesClient({ properties = [], filter, total }) {
               } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <Heart
-              className={`w-4 h-4 transition-all duration-300 ${isWishlisted ? "fill-white text-white" : "text-gray-600 group-hover:text-rose-500"
+              className={`w-4 h-4 cursor-pointer transition-all duration-300 ${isWishlisted ? "fill-white text-white" : "text-gray-600 group-hover:text-rose-500"
                 }`}
               strokeWidth={2}
             />
