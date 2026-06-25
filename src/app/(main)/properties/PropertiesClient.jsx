@@ -215,11 +215,14 @@ export default function PropertiesClient({ properties = [], filter, total }) {
     const typeColor = getPropertyTypeColor(property.propertyType);
     const typeLabel = propertyTypes.find(t => t.id === property.propertyType)?.label || property.propertyType;
 
+    // Use the rating and reviewCount from the API
+    const rating = property.rating || 0;
+    const reviewCount = property.reviewCount || 0;
+
     return (
       <div
-        className={`group bg-white rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-400 border-2 border-gray-100/60 hover:border-blue-200/70 hover:-translate-y-2 ${
-          isListView ? "flex flex-col md:flex-row" : ""
-        }`}
+        className={`group bg-white rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-400 border-2 border-gray-100/60 hover:border-blue-200/70 hover:-translate-y-2 ${isListView ? "flex flex-col md:flex-row" : ""
+          }`}
       >
         {/* Image Container */}
         <div className={`relative overflow-hidden ${isListView ? "md:w-72 md:h-auto h-56" : "h-56"}`}>
@@ -234,7 +237,7 @@ export default function PropertiesClient({ properties = [], filter, total }) {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent" />
           </div>
 
-          {/* Property Type Badge - Unique Design */}
+          {/* Property Type Badge */}
           <div className={`absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 backdrop-blur-sm shadow-md ${typeColor}`}>
             <TypeIcon className="w-3.5 h-3.5" strokeWidth={2} />
             <span className="text-xs font-semibold uppercase tracking-wider">{typeLabel}</span>
@@ -246,27 +249,31 @@ export default function PropertiesClient({ properties = [], filter, total }) {
             <span className="text-xs text-gray-500 ml-1">/{property.rentType}</span>
           </div>
 
-          {/* Rating Badge */}
-          <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
-            <div className="flex items-center gap-0.5">{renderStars(property.rating)}</div>
-            <span className="text-white text-sm font-medium">{property.rating}</span>
-            <span className="text-white/60 text-xs">({property.reviews})</span>
-          </div>
+          {/* Rating Badge - Only on image */}
+          {reviewCount > 0 ? (
+            <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
+              <div className="flex items-center gap-0.5">{renderStars(rating)}</div>
+              <span className="text-white text-sm font-medium">{rating.toFixed(1)}</span>
+              <span className="text-white/60 text-xs">({reviewCount})</span>
+            </div>
+          ) : (
+            <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
+              <span className="text-white/60 text-xs">No reviews yet</span>
+            </div>
+          )}
 
           {/* Wishlist Button */}
           <button
             onClick={() => toggleWishlist(property._id)}
             disabled={isWishlistLoading}
-            className={`absolute top-4 right-4 p-2.5 rounded-full transition-all duration-300 ${
-              isWishlisted
+            className={`absolute top-4 right-4 p-2.5 rounded-full transition-all duration-300 ${isWishlisted
                 ? "bg-rose-500 shadow-[0_4px_16px_rgba(244,63,94,0.3)]"
                 : "bg-white/90 backdrop-blur-sm hover:bg-white shadow-md hover:shadow-lg"
-            } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+              } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <Heart
-              className={`w-4 h-4 transition-all duration-300 ${
-                isWishlisted ? "fill-white text-white" : "text-gray-600 group-hover:text-rose-500"
-              }`}
+              className={`w-4 h-4 transition-all duration-300 ${isWishlisted ? "fill-white text-white" : "text-gray-600 group-hover:text-rose-500"
+                }`}
               strokeWidth={2}
             />
           </button>
@@ -305,7 +312,7 @@ export default function PropertiesClient({ properties = [], filter, total }) {
 
           {/* Amenities */}
           <div className="flex flex-wrap gap-1.5 mt-3">
-            {property.amenities.slice(0, isListView ? 6 : 4).map((amenity) => (
+            {property.amenities && property.amenities.slice(0, isListView ? 6 : 4).map((amenity) => (
               <span
                 key={amenity}
                 className="px-2.5 py-1 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-100"
@@ -313,7 +320,7 @@ export default function PropertiesClient({ properties = [], filter, total }) {
                 {amenity}
               </span>
             ))}
-            {property.amenities.length > (isListView ? 6 : 4) && (
+            {property.amenities && property.amenities.length > (isListView ? 6 : 4) && (
               <span className="px-2.5 py-1 bg-gray-50 text-gray-500 text-xs rounded-full border border-gray-200">
                 +{property.amenities.length - (isListView ? 6 : 4)} more
               </span>
@@ -475,22 +482,20 @@ export default function PropertiesClient({ properties = [], filter, total }) {
             <div className="flex gap-1 bg-gray-100/80 p-1 rounded-xl border border-gray-200">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 cursor-pointer rounded-lg transition-all duration-200 ${
-                  viewMode === "grid"
+                className={`p-1.5 cursor-pointer rounded-lg transition-all duration-200 ${viewMode === "grid"
                     ? "bg-white text-blue-600 shadow-sm"
                     : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
-                }`}
+                  }`}
                 aria-label="Grid view"
               >
                 <Grid3x3 className="w-4 h-4" strokeWidth={2} />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-1.5 cursor-pointer rounded-lg transition-all duration-200 ${
-                  viewMode === "list"
+                className={`p-1.5 cursor-pointer rounded-lg transition-all duration-200 ${viewMode === "list"
                     ? "bg-white text-blue-600 shadow-sm"
                     : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
-                }`}
+                  }`}
                 aria-label="List view"
               >
                 <List className="w-4 h-4" strokeWidth={2} />

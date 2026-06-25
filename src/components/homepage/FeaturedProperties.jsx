@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import {
   Bed,
   Bath,
@@ -17,6 +18,7 @@ import {
   TrendingUp,
   Clock,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 // ==================== FEATURED PROPERTIES COMPONENT ====================
 export default function FeaturedProperties({
@@ -24,162 +26,168 @@ export default function FeaturedProperties({
   subtitle = "Discover our handpicked selection of premium rental properties",
   viewAllLink = "/properties",
   viewAllText = "View All Properties",
-  initialProperties = [
-    {
-      id: 1,
-      title: "Luxury Apartment",
-      location: "Downtown, New York",
-      price: 1200,
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop",
-      beds: 3,
-      baths: 2,
-      sqft: 1200,
-      status: "available",
-      rating: 4.8,
-      reviews: 24,
-      featured: false,
-    },
-    {
-      id: 2,
-      title: "Modern Villa",
-      location: "Beverly Hills, LA",
-      price: 2500,
-      image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600&h=400&fit=crop",
-      beds: 5,
-      baths: 4,
-      sqft: 3500,
-      status: "featured",
-      rating: 4.9,
-      reviews: 18,
-      featured: true,
-    },
-    {
-      id: 3,
-      title: "Studio Loft",
-      location: "Arts District, Chicago",
-      price: 850,
-      image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&h=400&fit=crop",
-      beds: 1,
-      baths: 1,
-      sqft: 650,
-      status: "sold",
-      rating: 4.5,
-      reviews: 12,
-      featured: false,
-    },
-    {
-      id: 4,
-      title: "Beachfront Condo",
-      location: "Miami Beach, FL",
-      price: 1800,
-      image: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=600&h=400&fit=crop",
-      beds: 2,
-      baths: 2,
-      sqft: 1100,
-      status: "available",
-      rating: 4.7,
-      reviews: 31,
-      featured: false,
-    },
-    {
-      id: 5,
-      title: "Garden Cottage",
-      location: "Portland, OR",
-      price: 950,
-      image: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=600&h=400&fit=crop",
-      beds: 2,
-      baths: 1,
-      sqft: 850,
-      status: "available",
-      rating: 4.6,
-      reviews: 9,
-      featured: false,
-    },
-    {
-      id: 6,
-      title: "Penthouse Suite",
-      location: "Manhattan, NYC",
-      price: 3200,
-      image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=600&h=400&fit=crop",
-      beds: 4,
-      baths: 3,
-      sqft: 2800,
-      status: "featured",
-      rating: 4.9,
-      reviews: 42,
-      featured: true,
-    },
-  ],
+  initialProperties = [],
   userId = null,
   onWishlistToggle = null,
 }) {
+  const router = useRouter();
   const [properties, setProperties] = useState(initialProperties);
-  const [wishlistItems, setWishlistItems] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
+  // Check if user is logged in
+  const isLoggedIn = !!userId;
+
+  // ========== FETCH USER WISHLIST ==========
   useEffect(() => {
-    if (userId) {
-      fetchUserWishlist();
-    }
+    const fetchWishlist = async () => {
+      try {
+        if (userId) {
+          // Fetch from API if userId is provided
+          const response = await fetch(`/api/wishlist?userId=${userId}`);
+          if (!response.ok) throw new Error("Failed to fetch wishlist");
+          const data = await response.json();
+          setWishlist(data);
+        } else {
+          // Fallback to localStorage
+          const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+          setWishlist(savedWishlist);
+        }
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+        // Fallback to localStorage
+        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+        setWishlist(savedWishlist);
+      }
+    };
+    fetchWishlist();
   }, [userId]);
 
-  const fetchUserWishlist = async () => {
+  // ========== WISHLIST HANDLERS ==========
+  const handleAddToWishlist = async (propertyId) => {
+    setIsWishlistLoading(true);
     try {
-      const response = await fetch(`/api/wishlist?userId=${userId}`);
-      if (!response.ok) throw new Error("Failed to fetch wishlist");
-      const data = await response.json();
-      setWishlistItems(data);
-    } catch (error) {
-      console.error("Error fetching wishlist:", error);
-      const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-      setWishlistItems(savedWishlist);
-    }
-  };
+      // Optimistic update
+      setWishlist((prev) => [...prev, propertyId]);
 
-  const handleWishlist = async (propertyId) => {
-    if (isLoading) return;
-    const isWishlisted = wishlistItems.includes(propertyId);
+      if (userId) {
+        // API call
+        const response = await fetch("/api/wishlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ propertyId, userId }),
+        });
 
-    try {
-      setIsLoading(true);
-      setWishlistItems((prev) =>
-        isWishlisted ? prev.filter((id) => id !== propertyId) : [...prev, propertyId]
-      );
-
-      const response = await fetch("/api/wishlist", {
-        method: isWishlisted ? "DELETE" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertyId, userId }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update wishlist");
-      const data = await response.json();
-
-      const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-      if (isWishlisted) {
-        localStorage.setItem("wishlist", JSON.stringify(savedWishlist.filter((id) => id !== propertyId)));
-      } else {
+        if (!response.ok) throw new Error("Failed to add to wishlist");
+        const data = await response.json();
+        
+        // Update localStorage
+        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
         localStorage.setItem("wishlist", JSON.stringify([...savedWishlist, propertyId]));
-      }
-
-      if (onWishlistToggle) {
-        onWishlistToggle(propertyId, !isWishlisted, data);
+        
+        toast.success("Added to wishlist!");
+        
+        if (onWishlistToggle) {
+          onWishlistToggle(propertyId, true, data);
+        }
+      } else {
+        // Guest mode - localStorage only
+        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+        localStorage.setItem("wishlist", JSON.stringify([...savedWishlist, propertyId]));
+        toast.success("Added to wishlist!");
       }
     } catch (error) {
-      console.error("Error updating wishlist:", error);
-      setWishlistItems((prev) =>
-        isWishlisted ? [...prev, propertyId] : prev.filter((id) => id !== propertyId)
-      );
-      alert("Failed to update wishlist. Please try again.");
+      // Revert optimistic update
+      setWishlist((prev) => prev.filter((id) => id !== propertyId));
+      toast.error("Failed to add to wishlist");
+      console.error("Error adding to wishlist:", error);
     } finally {
-      setIsLoading(false);
+      setIsWishlistLoading(false);
     }
   };
 
+  const handleRemoveFromWishlist = async (propertyId) => {
+    setIsWishlistLoading(true);
+    try {
+      // Optimistic update
+      setWishlist((prev) => prev.filter((id) => id !== propertyId));
+
+      if (userId) {
+        // API call
+        const response = await fetch("/api/wishlist", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ propertyId, userId }),
+        });
+
+        if (!response.ok) throw new Error("Failed to remove from wishlist");
+        const data = await response.json();
+        
+        // Update localStorage
+        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+        localStorage.setItem(
+          "wishlist",
+          JSON.stringify(savedWishlist.filter((id) => id !== propertyId))
+        );
+        
+        toast.success("Removed from wishlist!");
+        
+        if (onWishlistToggle) {
+          onWishlistToggle(propertyId, false, data);
+        }
+      } else {
+        // Guest mode - localStorage only
+        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+        localStorage.setItem(
+          "wishlist",
+          JSON.stringify(savedWishlist.filter((id) => id !== propertyId))
+        );
+        toast.success("Removed from wishlist!");
+      }
+    } catch (error) {
+      // Revert optimistic update
+      setWishlist((prev) => [...prev, propertyId]);
+      toast.error("Failed to remove from wishlist");
+      console.error("Error removing from wishlist:", error);
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  };
+
+  const toggleWishlist = (propertyId) => {
+    if (!isLoggedIn) {
+      toast.info("Please login to add to wishlist");
+      router.push(`/auth/login?redirect=${window.location.pathname}`);
+      return;
+    }
+    
+    const isWishlisted = wishlist.includes(propertyId);
+    if (isWishlisted) {
+      handleRemoveFromWishlist(propertyId);
+    } else {
+      handleAddToWishlist(propertyId);
+    }
+  };
+
+  // ========== VIEW DETAILS HANDLER ==========
+  const handleViewDetails = (propertyId, e) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      toast.info("Please login to view property details");
+      router.push(`/auth/login?redirect=/properties/${propertyId}`);
+    }
+  };
+
+  // ========== STATUS BADGE ==========
   const getStatusBadge = (status) => {
     const statusMap = {
       available: {
+        label: "Available",
+        className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        icon: <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />,
+      },
+      approved: {
         label: "Available",
         className: "bg-emerald-50 text-emerald-700 border-emerald-200",
         icon: <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />,
@@ -188,6 +196,11 @@ export default function FeaturedProperties({
         label: "Featured",
         className: "bg-amber-50 text-amber-700 border-amber-200",
         icon: <Sparkles className="w-3 h-3" />,
+      },
+      pending: {
+        label: "Pending",
+        className: "bg-yellow-50 text-yellow-700 border-yellow-200",
+        icon: <Clock className="w-3 h-3" />,
       },
       sold: {
         label: "Sold",
@@ -198,8 +211,30 @@ export default function FeaturedProperties({
     return statusMap[status] || statusMap.available;
   };
 
+  // ========== FORMAT PRICE ==========
   const formatPrice = (price) => {
     return `$${price.toLocaleString()}`;
+  };
+
+  // ========== RENDER STARS ==========
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    const stars = [];
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<Star key={`full-${i}`} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />);
+    }
+    if (hasHalfStar) {
+      stars.push(
+        <div key="half" className="relative">
+          <Star className="w-3.5 h-3.5 text-yellow-400" />
+          <div className="absolute inset-0 w-1/2 overflow-hidden">
+            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+          </div>
+        </div>
+      );
+    }
+    return stars;
   };
 
   // Split title into two parts for gradient effect
@@ -235,17 +270,20 @@ export default function FeaturedProperties({
         {/* Property Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {properties.map((property, index) => {
-            const statusInfo = getStatusBadge(property.status);
-            const isHovered = hoveredCard === property.id;
-            const isWishlisted = wishlistItems.includes(property.id);
+            const statusInfo = getStatusBadge(property.status || "approved");
+            const isHovered = hoveredCard === property._id;
+            const isWishlisted = wishlist.includes(property._id);
+            const isFeatured = property.isFeatured === "true" || property.isFeatured === true;
+            const rating = property.rating || 0;
+            const reviewCount = property.reviewCount || 0;
 
             return (
               <motion.div
-                key={property.id}
+                key={property._id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.08 }}
-                onMouseEnter={() => setHoveredCard(property.id)}
+                onMouseEnter={() => setHoveredCard(property._id)}
                 onMouseLeave={() => setHoveredCard(null)}
                 className="group relative bg-white rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all duration-400 border-2 border-gray-100/60 hover:border-blue-200/70 hover:-translate-y-2"
               >
@@ -253,7 +291,7 @@ export default function FeaturedProperties({
                 <div className="relative overflow-hidden">
                   <div className="relative h-56 w-full">
                     <Image
-                      src={property.image}
+                      src={property.mainImage}
                       alt={property.title}
                       fill
                       className={`object-cover transition-transform duration-700 ${
@@ -274,13 +312,13 @@ export default function FeaturedProperties({
 
                   {/* Wishlist Button */}
                   <button
-                    onClick={() => handleWishlist(property.id)}
-                    disabled={isLoading}
+                    onClick={() => toggleWishlist(property._id)}
+                    disabled={isWishlistLoading}
                     className={`absolute cursor-pointer top-4 right-4 p-2.5 rounded-full transition-all duration-300 ${
                       isWishlisted
                         ? "bg-rose-500 shadow-[0_4px_16px_rgba(244,63,94,0.3)]"
                         : "bg-white/90 backdrop-blur-sm hover:bg-white shadow-md hover:shadow-lg"
-                    } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                     aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                   >
                     <Heart
@@ -298,26 +336,28 @@ export default function FeaturedProperties({
                     <span className="text-lg font-bold text-blue-600">
                       {formatPrice(property.price)}
                     </span>
-                    <span className="text-xs text-gray-500 ml-1">/mo</span>
+                    <span className="text-xs text-gray-500 ml-1">/{property.rentType || "mo"}</span>
                   </div>
 
                   {/* Rating Badge */}
-                  <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
-                    <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-white text-sm font-medium">
-                      {property.rating}
-                    </span>
-                    <span className="text-white/60 text-xs">
-                      ({property.reviews})
-                    </span>
-                  </div>
+                  {reviewCount > 0 ? (
+                    <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
+                      <div className="flex items-center gap-0.5">{renderStars(rating)}</div>
+                      <span className="text-white text-sm font-medium">{rating.toFixed(1)}</span>
+                      <span className="text-white/60 text-xs">({reviewCount})</span>
+                    </div>
+                  ) : (
+                    <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full border border-white/10">
+                      <span className="text-white/60 text-xs">No reviews yet</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
                 <div className="relative p-5">
                   {/* Title & Location */}
                   <div className="mb-3">
-                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 line-clamp-1">
                       {property.title}
                     </h3>
                     <p className="text-gray-500 text-sm flex items-center gap-1.5 mt-1">
@@ -332,35 +372,57 @@ export default function FeaturedProperties({
                       <div className="p-1.5 bg-blue-50 rounded-lg">
                         <Bed className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
                       </div>
-                      <span>{property.beds} Beds</span>
+                      <span>{property.bedrooms} Beds</span>
                     </div>
                     <div className="w-px h-6 bg-gray-200" />
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <div className="p-1.5 bg-blue-50 rounded-lg">
                         <Bath className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
                       </div>
-                      <span>{property.baths} Baths</span>
+                      <span>{property.bathrooms} Baths</span>
                     </div>
                     <div className="w-px h-6 bg-gray-200" />
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <div className="p-1.5 bg-blue-50 rounded-lg">
                         <Ruler className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
                       </div>
-                      <span>{property.sqft} sqft</span>
+                      <span>{property.propertySize || "N/A"} sqft</span>
                     </div>
                   </div>
 
-                  {/* Action Button */}
+                  {/* Amenities Preview */}
+                  {property.amenities && property.amenities.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {property.amenities.slice(0, 3).map((amenity) => (
+                        <span
+                          key={amenity}
+                          className="px-2.5 py-1 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-100"
+                        >
+                          {amenity}
+                        </span>
+                      ))}
+                      {property.amenities.length > 3 && (
+                        <span className="px-2.5 py-1 bg-gray-50 text-gray-500 text-xs rounded-full border border-gray-200">
+                          +{property.amenities.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* View Details Button */}
                   <div className="mt-4">
                     <Link
-                      href={`/properties/${property.id}`}
+                      href={isLoggedIn ? `/properties/${property._id}` : "#"}
+                      onClick={(e) => handleViewDetails(property._id, e)}
                       className={`w-full flex items-center justify-between px-5 py-3 bg-gradient-to-r from-blue-50 to-transparent text-blue-700 font-semibold rounded-xl transition-all duration-300 border border-blue-100/50 ${
                         isHovered
                           ? "from-blue-600 to-blue-700 text-white border-blue-600 shadow-[0_4px_16px_rgba(37,99,235,0.25)]"
                           : "hover:from-blue-100/50 hover:to-transparent"
                       }`}
                     >
-                      <span>View Details</span>
+                      <span>
+                        {isLoggedIn ? "View Details" : "Login to View Details"}
+                      </span>
                       <ChevronRight
                         className={`w-4 h-4 transition-transform duration-300 ${
                           isHovered ? "translate-x-1" : ""
@@ -370,8 +432,8 @@ export default function FeaturedProperties({
                     </Link>
                   </div>
 
-                  {/* Featured tag */}
-                  {property.featured && (
+                  {/* Featured HOT tag */}
+                  {isFeatured && (
                     <div className="absolute -top-2 -right-2">
                       <div className="relative">
                         <div className="absolute inset-0 bg-amber-400 blur-md opacity-30 rounded-full" />
@@ -396,10 +458,12 @@ export default function FeaturedProperties({
           className="text-center mt-12"
         >
           <Link
-            href={viewAllLink}
+            href={isLoggedIn ? viewAllLink : "/auth/login?redirect=/properties"}
             className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-blue-600 font-semibold rounded-2xl border-2 border-blue-100 hover:border-blue-400 shadow-sm hover:shadow-[0_8px_24px_rgba(37,99,235,0.12)] transition-all duration-300 hover:-translate-y-1 group"
           >
-            <span>{viewAllText}</span>
+            <span>
+              {isLoggedIn ? viewAllText : "Login to View All Properties"}
+            </span>
             <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={2.5} />
           </Link>
         </motion.div>

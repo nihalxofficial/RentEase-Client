@@ -6,13 +6,17 @@ import Newsletter from "@/components/homepage/Newsletter";
 import PropertyAmenities from "@/components/homepage/PropertyAmenities";
 import TopLocations from "@/components/homepage/TopLocations";
 import WhyChooseUs from "@/components/homepage/WhyChooseUs";
-import Image from "next/image";
+import { getFeaturedProperties } from "@/lib/api/properties";
+import { getUserSession } from "@/lib/core/session";
 
-export default function Home() {
+export default async function Home() {
+  const {properties} = await getFeaturedProperties();
+  // console.log(properties);
+  const user = await getUserSession();
   return (
     <div>
       <HeroBanner/>
-      <FeaturedProperties/>
+      <FeaturedProperties userId={user?.id} initialProperties={properties}/>
       <WhyChooseUs/>
       <PropertyAmenities/>
       <CustomerReviews/>
