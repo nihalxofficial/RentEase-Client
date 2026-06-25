@@ -56,13 +56,14 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { addReview } from "@/lib/action/reviews";
+import { addToWishlist, removeWishlist } from "@/lib/action/wishlist";
 
 // ==================== PROPERTY DETAILS CLIENT ====================
-export default function PropertyDetailsClient({ property, reviews: initialReviews = [], tenant, propertyId }) {
+export default function PropertyDetailsClient({ property, reviews: initialReviews = [], tenant, propertyId, wishlistStatus = false }) {
   const router = useRouter();
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(wishlistStatus);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
-  const [reviews, setReviews] = useState(initialReviews); // State for reviews
+  const [reviews, setReviews] = useState(initialReviews);
   const [selectedRating, setSelectedRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -231,7 +232,12 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
   const handleAddToWishlist = async () => {
     setIsWishlistLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // await new Promise((resolve) => setTimeout(resolve, 500));
+      const wish = {
+        propertyId: propertyId,
+        tenantId: tenant?.id,
+      }
+      const result = await addToWishlist(wish)
       setIsWishlisted(true);
       toast.success("Added to wishlist!");
     } catch (error) {
@@ -243,9 +249,12 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
 
   const handleRemoveFromWishlist = async () => {
     setIsWishlistLoading(true);
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await removeWishlist(propertyId, tenant?.id);
+
       setIsWishlisted(false);
+
       toast.success("Removed from wishlist!");
     } catch (error) {
       toast.error("Failed to remove from wishlist");
@@ -265,7 +274,7 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
   // ========== REVIEW HANDLERS ==========
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    
+
     if (selectedRating === 0) {
       toast.error("Please select a rating");
       return;
@@ -285,7 +294,7 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
       };
 
       const result = await addReview(newReview, propertyId);
-      
+
       // Create the review object with tenant data for immediate display
       const reviewWithTenant = {
         _id: result?.data?._id || Date.now(),
@@ -299,10 +308,10 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
           image: tenant?.image || null,
         }
       };
-      
+
       // Update reviews state immediately
       setReviews([reviewWithTenant, ...reviews]);
-      
+
       setSelectedRating(0);
       setReviewComment("");
       toast.success("Review submitted successfully!");
@@ -392,7 +401,7 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                
+
                 {/* Image Counter */}
                 {allImages.length > 1 && (
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-white text-xs">
@@ -400,7 +409,7 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
                   </div>
                 )}
               </div>
-              
+
               {/* Status Badge */}
               <div className="absolute top-4 left-4">
                 <span className="px-4 py-2 bg-emerald-500 text-white text-sm font-semibold rounded-full flex items-center gap-2 shadow-lg">
@@ -413,16 +422,14 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
               <button
                 onClick={(e) => { e.stopPropagation(); toggleWishlist(); }}
                 disabled={isWishlistLoading}
-                className={`absolute cursor-pointer top-4 right-4 p-3 rounded-full transition-all duration-300 shadow-lg ${
-                  isWishlisted
+                className={`absolute cursor-pointer top-4 right-4 p-3 rounded-full transition-all duration-300 shadow-lg ${isWishlisted
                     ? "bg-rose-500 shadow-[0_4px_16px_rgba(244,63,94,0.3)]"
                     : "bg-white/90 backdrop-blur-sm hover:bg-white shadow-md hover:shadow-lg"
-                } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <Heart
-                  className={`w-5 h-5 transition-all duration-300 ${
-                    isWishlisted ? "fill-white text-white" : "text-gray-600"
-                  }`}
+                  className={`w-5 h-5 transition-all duration-300 ${isWishlisted ? "fill-white text-white" : "text-gray-600"
+                    }`}
                   strokeWidth={2}
                 />
               </button>
@@ -453,11 +460,10 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
                   <div
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`relative h-20 rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2 ${
-                      selectedImageIndex === index 
-                        ? "border-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.3)]" 
+                    className={`relative h-20 rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2 ${selectedImageIndex === index
+                        ? "border-blue-500 shadow-[0_0_0_3px_rgba(59,130,246,0.3)]"
                         : "border-blue-100/50 hover:border-blue-300"
-                    }`}
+                      }`}
                   >
                     <Image
                       src={img}
@@ -584,7 +590,7 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
               </button>
 
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => setIsShareModalOpen(true)}
                   className="flex-1 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
                 >
@@ -594,16 +600,14 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
                 <button
                   onClick={toggleWishlist}
                   disabled={isWishlistLoading}
-                  className={`flex-1 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 text-sm font-medium ${
-                    isWishlisted
+                  className={`flex-1 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 text-sm font-medium ${isWishlisted
                       ? "bg-rose-50 text-rose-600 border-2 border-rose-200 hover:bg-rose-100"
                       : "bg-white border-2 border-gray-200 hover:bg-gray-50 text-gray-700"
-                  } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <Heart
-                    className={`w-4 h-4 transition-all duration-300 ${
-                      isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-400"
-                    }`}
+                    className={`w-4 h-4 transition-all duration-300 ${isWishlisted ? "fill-rose-500 text-rose-500" : "text-gray-400"
+                      }`}
                     strokeWidth={2}
                   />
                   <span>{isWishlisted ? "Wishlisted" : "Add to Wishlist"}</span>
@@ -641,11 +645,10 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
                       className="cursor-pointer focus:outline-none"
                     >
                       <Star
-                        className={`w-7 h-7 transition-colors ${
-                          star <= selectedRating
+                        className={`w-7 h-7 transition-colors ${star <= selectedRating
                             ? "fill-yellow-400 text-yellow-400"
                             : "text-gray-200 hover:text-gray-300"
-                        }`}
+                          }`}
                         strokeWidth={1.5}
                       />
                     </button>
@@ -711,7 +714,7 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
                       review.tenant?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'
                     )}
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center flex-wrap gap-2">
                       <h4 className="font-semibold text-gray-900 text-sm">
@@ -799,7 +802,7 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
             >
               <X className="w-8 h-8" />
             </button>
-            
+
             <div className="relative h-[70vh] w-full">
               <Image
                 src={allImages[selectedImageIndex]}
@@ -823,15 +826,14 @@ export default function PropertyDetailsClient({ property, reviews: initialReview
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
-                
+
                 <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 flex gap-2">
                   {allImages.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === selectedImageIndex ? "bg-white w-6" : "bg-white/40"
-                      }`}
+                      className={`w-2 h-2 rounded-full transition-all ${index === selectedImageIndex ? "bg-white w-6" : "bg-white/40"
+                        }`}
                     />
                   ))}
                 </div>

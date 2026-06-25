@@ -2,6 +2,7 @@ import { getPropertyById } from '@/lib/api/properties';
 import PropertyDetailsClient from './PropertyDetailsClient';
 import { getUserSession } from '@/lib/core/session';
 import { getReviewsByProperty } from '@/lib/api/reviews';
+import { checkWishlist } from '@/lib/api/wishlist';
 
 export default async function PropertyDetailsPage({ params }) {
   const { id } = await params;
@@ -10,12 +11,15 @@ export default async function PropertyDetailsPage({ params }) {
   const user = await getUserSession();
   const reviews = await getReviewsByProperty(id);
 
+  const {isWishlisted} = await checkWishlist(id, user?.id);
+
   return (
     <PropertyDetailsClient 
       property={propertyDetails} 
       reviews={reviews}
       tenant={user}
       propertyId={id}
+      wishlistStatus={isWishlisted}
     />
   );
 }

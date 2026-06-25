@@ -450,7 +450,7 @@ export default function FeaturedProperties({
           })}
         </div>
 
-        {/* View All Button */}
+        {/* View All Button - Now Public (No Login Required) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -458,12 +458,10 @@ export default function FeaturedProperties({
           className="text-center mt-12"
         >
           <Link
-            href={isLoggedIn ? viewAllLink : "/auth/login?redirect=/properties"}
+            href={viewAllLink}
             className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-blue-600 font-semibold rounded-2xl border-2 border-blue-100 hover:border-blue-400 shadow-sm hover:shadow-[0_8px_24px_rgba(37,99,235,0.12)] transition-all duration-300 hover:-translate-y-1 group"
           >
-            <span>
-              {isLoggedIn ? viewAllText : "Login to View All Properties"}
-            </span>
+            <span>{viewAllText}</span>
             <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={2.5} />
           </Link>
         </motion.div>
