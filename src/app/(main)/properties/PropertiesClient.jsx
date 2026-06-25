@@ -40,6 +40,9 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [page, setPage] = useState(parseInt(filter.page) || 1);
 
+  const isLoggedIn = !!tenant?.id;
+  const router = useRouter();
+
   // ========== PAGINATION ==========
   const itemsPerPage = 6;
   const totalPages = Math.ceil(total / itemsPerPage);
@@ -60,24 +63,29 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
 
   // ========== UI STATE ==========
   const [searchTerm, setSearchTerm] = useState(filter.search || "");
-  const [propertyType, setPropertyType] = useState(filter.propertyType || "all");
+  const [propertyType, setPropertyType] = useState(filter.propertyType || filter.type || "all");
   const [sortBy, setSortBy] = useState(filter.sortBy || "default");
-
-  const router = useRouter();
+  const [location, setLocation] = useState(filter.location || "");
+  const [minPrice, setMinPrice] = useState(filter.minPrice || "");
+  const [maxPrice, setMaxPrice] = useState(filter.maxPrice || "");
 
   useEffect(() => {
     const sp = new URLSearchParams();
     if (searchTerm) sp.set("search", searchTerm);
+    if (location) sp.set("location", location);
+    if (minPrice) sp.set("minPrice", minPrice);
+    if (maxPrice) sp.set("maxPrice", maxPrice);
     if (propertyType !== "all") sp.set("propertyType", propertyType);
     if (sortBy !== "default") sp.set("sortBy", sortBy);
     sp.set("page", String(page));
     sp.set("perPage", String(itemsPerPage));
     router.push(`?${sp.toString()}`);
-  }, [searchTerm, propertyType, sortBy, page, router]);
+  }, [searchTerm, propertyType, sortBy, page, location, minPrice, maxPrice, router]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
-  }, [searchTerm, propertyType, sortBy]);
+  }, [searchTerm, propertyType, sortBy, location, minPrice, maxPrice]);
 
   // ========== SIMULATE LOADING ==========
   useEffect(() => {
@@ -87,6 +95,12 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
 
   // ========== WISHLIST HANDLERS ==========
   const handleAddToWishlist = async (propertyId) => {
+    if (!isLoggedIn) {
+      toast.info("Please login to add to wishlist");
+      router.push(`/auth/login?redirect=${window.location.pathname}`);
+      return;
+    }
+
     setIsWishlistLoading(true);
     try {
       await addToWishlist({ propertyId, tenantId: tenant?.id });
@@ -100,6 +114,12 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
   };
 
   const handleRemoveFromWishlist = async (propertyId) => {
+    if (!isLoggedIn) {
+      toast.info("Please login to remove from wishlist");
+      router.push(`/auth/login?redirect=${window.location.pathname}`);
+      return;
+    }
+
     setIsWishlistLoading(true);
     try {
       await removeWishlist(propertyId, tenant?.id);
@@ -118,6 +138,15 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
       handleRemoveFromWishlist(propertyId);
     } else {
       handleAddToWishlist(propertyId);
+    }
+  };
+
+  // ========== VIEW DETAILS HANDLER ==========
+  const handleViewDetails = (propertyId, e) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      toast.info("Please login to view property details");
+      router.push(`/auth/login?redirect=/properties/${propertyId}`);
     }
   };
 
@@ -245,8 +274,8 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
             onClick={() => toggleWishlist(property._id)}
             disabled={isWishlistLoading}
             className={`absolute cursor-pointer top-4 right-4 p-2.5 rounded-full transition-all duration-300 ${isWishlisted
-                ? "bg-rose-500 shadow-[0_4px_16px_rgba(244,63,94,0.3)]"
-                : "bg-white/90 backdrop-blur-sm hover:bg-white shadow-md hover:shadow-lg"
+              ? "bg-rose-500 shadow-[0_4px_16px_rgba(244,63,94,0.3)]"
+              : "bg-white/90 backdrop-blur-sm hover:bg-white shadow-md hover:shadow-lg"
               } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <Heart
@@ -305,12 +334,13 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
             )}
           </div>
 
-          {/* View Details Button */}
+          {/* View Details Button - Updated with Login Check */}
           <Link
-            href={`/properties/${property._id}`}
+            href={isLoggedIn ? `/properties/${property._id}` : "#"}
+            onClick={(e) => handleViewDetails(property._id, e)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.25)] hover:shadow-[0_8px_24px_rgba(37,99,235,0.35)] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] text-sm mt-4"
           >
-            View Details
+            {isLoggedIn ? "View Details" : "Login to View Details"}
             <ArrowUpDown className="w-4 h-4" strokeWidth={2.5} />
           </Link>
         </div>
@@ -461,8 +491,8 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-1.5 cursor-pointer rounded-lg transition-all duration-200 ${viewMode === "grid"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
                   }`}
                 aria-label="Grid view"
               >
@@ -471,8 +501,8 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
               <button
                 onClick={() => setViewMode("list")}
                 className={`p-1.5 cursor-pointer rounded-lg transition-all duration-200 ${viewMode === "list"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
                   }`}
                 aria-label="List view"
               >

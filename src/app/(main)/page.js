@@ -14,7 +14,6 @@ export default async function Home() {
   const { properties } = await getFeaturedProperties();
   const user = await getUserSession();
   const wishlistedIds = await getWishlistByTenant(user?.id);
-  console.log(wishlistedIds);
 
   return (
     <div>

@@ -208,11 +208,10 @@ export default function HeroBanner({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-            className="search-card mt-12 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-4 md:p-6 max-w-4xl mx-auto border border-white/50"
+            className="search-card mt-12 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-4 md:p-6 max-w-5xl mx-auto border border-white/50"
           >
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
+            <form onSubmit={handleSearch}>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 {/* --- Location --- */}
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-xs font-semibold text-blue-600 uppercase tracking-wider flex items-center gap-1">
@@ -317,17 +316,20 @@ export default function HeroBanner({
                     className="hero-input w-full px-3 py-2.5 text-sm border-2 rounded-xl shadow-sm outline-none transition-all duration-200 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                 </div>
-              </div>
 
-              {/* Search Button */}
-              <div className="flex justify-center pt-1">
-                <Button
-                  type="submit"
-                  className="inline-flex items-center gap-2 px-12 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.35)] hover:shadow-[0_8px_24px_rgba(37,99,235,0.45)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
-                >
-                  <Search className="w-5 h-5" strokeWidth={2} />
-                  Search Properties
-                </Button>
+                {/* --- Search Button --- */}
+                <div className="flex flex-col gap-1.5">
+                  <Label className="text-xs font-semibold text-blue-600 uppercase tracking-wider opacity-0">
+                    Search
+                  </Label>
+                  <Button
+                    type="submit"
+                    className="w-full h-[42px] flex items-center justify-center gap-2 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-[0_4px_14px_rgba(37,99,235,0.35)] hover:shadow-[0_8px_24px_rgba(37,99,235,0.45)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300"
+                  >
+                    <Search className="w-4 h-4" strokeWidth={2} />
+                    <span>Search</span>
+                  </Button>
+                </div>
               </div>
             </form>
           </motion.div>
