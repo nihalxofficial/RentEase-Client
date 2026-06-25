@@ -5,5 +5,6 @@ export const checkWishlist = async(propertyId, tenantId)=>{
 }
 
 export const getWishlistByTenant = async( tenantId)=>{
-    return serverFetch(`/wishlist?tenantId=${tenantId}`)
+    const data = await serverFetch(`/wishlist?tenantId=${tenantId}`)
+    return data.map(w => w.propertyId.toString());
 }

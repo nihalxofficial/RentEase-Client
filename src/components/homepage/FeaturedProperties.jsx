@@ -1,7 +1,6 @@
-// src/components/sections/FeaturedProperties.jsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -19,6 +18,7 @@ import {
   Clock,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { addToWishlist, removeWishlist } from "@/lib/action/wishlist";
 
 // ==================== FEATURED PROPERTIES COMPONENT ====================
 export default function FeaturedProperties({
@@ -28,80 +28,27 @@ export default function FeaturedProperties({
   viewAllText = "View All Properties",
   initialProperties = [],
   userId = null,
+  initialWishlist = [],
   onWishlistToggle = null,
 }) {
   const router = useRouter();
   const [properties, setProperties] = useState(initialProperties);
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useState(initialWishlist);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
 
-  // Check if user is logged in
   const isLoggedIn = !!userId;
-
-  // ========== FETCH USER WISHLIST ==========
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      try {
-        if (userId) {
-          // Fetch from API if userId is provided
-          const response = await fetch(`/api/wishlist?userId=${userId}`);
-          if (!response.ok) throw new Error("Failed to fetch wishlist");
-          const data = await response.json();
-          setWishlist(data);
-        } else {
-          // Fallback to localStorage
-          const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-          setWishlist(savedWishlist);
-        }
-      } catch (error) {
-        console.error("Error fetching wishlist:", error);
-        // Fallback to localStorage
-        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        setWishlist(savedWishlist);
-      }
-    };
-    fetchWishlist();
-  }, [userId]);
 
   // ========== WISHLIST HANDLERS ==========
   const handleAddToWishlist = async (propertyId) => {
     setIsWishlistLoading(true);
     try {
-      // Optimistic update
+      await addToWishlist({ propertyId, tenantId: userId });
       setWishlist((prev) => [...prev, propertyId]);
-
-      if (userId) {
-        // API call
-        const response = await fetch("/api/wishlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ propertyId, userId }),
-        });
-
-        if (!response.ok) throw new Error("Failed to add to wishlist");
-        const data = await response.json();
-        
-        // Update localStorage
-        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        localStorage.setItem("wishlist", JSON.stringify([...savedWishlist, propertyId]));
-        
-        toast.success("Added to wishlist!");
-        
-        if (onWishlistToggle) {
-          onWishlistToggle(propertyId, true, data);
-        }
-      } else {
-        // Guest mode - localStorage only
-        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        localStorage.setItem("wishlist", JSON.stringify([...savedWishlist, propertyId]));
-        toast.success("Added to wishlist!");
-      }
+      toast.success("Added to wishlist!");
+      if (onWishlistToggle) onWishlistToggle(propertyId, true);
     } catch (error) {
-      // Revert optimistic update
-      setWishlist((prev) => prev.filter((id) => id !== propertyId));
       toast.error("Failed to add to wishlist");
-      console.error("Error adding to wishlist:", error);
     } finally {
       setIsWishlistLoading(false);
     }
@@ -110,46 +57,12 @@ export default function FeaturedProperties({
   const handleRemoveFromWishlist = async (propertyId) => {
     setIsWishlistLoading(true);
     try {
-      // Optimistic update
+      await removeWishlist(propertyId, userId);
       setWishlist((prev) => prev.filter((id) => id !== propertyId));
-
-      if (userId) {
-        // API call
-        const response = await fetch("/api/wishlist", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ propertyId, userId }),
-        });
-
-        if (!response.ok) throw new Error("Failed to remove from wishlist");
-        const data = await response.json();
-        
-        // Update localStorage
-        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        localStorage.setItem(
-          "wishlist",
-          JSON.stringify(savedWishlist.filter((id) => id !== propertyId))
-        );
-        
-        toast.success("Removed from wishlist!");
-        
-        if (onWishlistToggle) {
-          onWishlistToggle(propertyId, false, data);
-        }
-      } else {
-        // Guest mode - localStorage only
-        const savedWishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-        localStorage.setItem(
-          "wishlist",
-          JSON.stringify(savedWishlist.filter((id) => id !== propertyId))
-        );
-        toast.success("Removed from wishlist!");
-      }
+      toast.success("Removed from wishlist!");
+      if (onWishlistToggle) onWishlistToggle(propertyId, false);
     } catch (error) {
-      // Revert optimistic update
-      setWishlist((prev) => [...prev, propertyId]);
       toast.error("Failed to remove from wishlist");
-      console.error("Error removing from wishlist:", error);
     } finally {
       setIsWishlistLoading(false);
     }
@@ -161,7 +74,6 @@ export default function FeaturedProperties({
       router.push(`/auth/login?redirect=${window.location.pathname}`);
       return;
     }
-    
     const isWishlisted = wishlist.includes(propertyId);
     if (isWishlisted) {
       handleRemoveFromWishlist(propertyId);
@@ -212,9 +124,7 @@ export default function FeaturedProperties({
   };
 
   // ========== FORMAT PRICE ==========
-  const formatPrice = (price) => {
-    return `$${price.toLocaleString()}`;
-  };
+  const formatPrice = (price) => `$${price.toLocaleString()}`;
 
   // ========== RENDER STARS ==========
   const renderStars = (rating) => {
@@ -237,7 +147,6 @@ export default function FeaturedProperties({
     return stars;
   };
 
-  // Split title into two parts for gradient effect
   const titleParts = title.split(' ');
 
   return (
@@ -450,7 +359,7 @@ export default function FeaturedProperties({
           })}
         </div>
 
-        {/* View All Button - Now Public (No Login Required) */}
+        {/* View All Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

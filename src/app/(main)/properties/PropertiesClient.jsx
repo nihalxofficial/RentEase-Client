@@ -244,13 +244,13 @@ export default function PropertiesClient({ properties = [], filter, total, tenan
           <button
             onClick={() => toggleWishlist(property._id)}
             disabled={isWishlistLoading}
-            className={`absolute top-4 right-4 p-2.5 rounded-full transition-all duration-300 ${isWishlisted
+            className={`absolute cursor-pointer top-4 right-4 p-2.5 rounded-full transition-all duration-300 ${isWishlisted
                 ? "bg-rose-500 shadow-[0_4px_16px_rgba(244,63,94,0.3)]"
                 : "bg-white/90 backdrop-blur-sm hover:bg-white shadow-md hover:shadow-lg"
               } ${isWishlistLoading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <Heart
-              className={`w-4 h-4 cursor-pointer transition-all duration-300 ${isWishlisted ? "fill-white text-white" : "text-gray-600 group-hover:text-rose-500"
+              className={`w-4 h-4 transition-all duration-300 ${isWishlisted ? "fill-white text-white" : "text-gray-600 group-hover:text-rose-500"
                 }`}
               strokeWidth={2}
             />
