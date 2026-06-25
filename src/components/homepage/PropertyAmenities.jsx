@@ -90,63 +90,31 @@ export default function PropertyAmenities({
     },
   ],
 }) {
-  const [hoveredId, setHoveredId] = useState(null);
-
   const getColorStyles = (color) => {
     const colors = {
       blue: {
-        bg: "bg-blue-50",
-        iconBg: "bg-blue-100",
-        icon: "text-blue-600",
         border: "border-blue-200/60",
         hover: "hover:border-blue-300/80 hover:shadow-blue-100/30",
-        gradient: "from-blue-500 to-blue-600",
-        light: "bg-blue-50/50",
       },
       emerald: {
-        bg: "bg-emerald-50",
-        iconBg: "bg-emerald-100",
-        icon: "text-emerald-600",
         border: "border-emerald-200/60",
         hover: "hover:border-emerald-300/80 hover:shadow-emerald-100/30",
-        gradient: "from-emerald-500 to-emerald-600",
-        light: "bg-emerald-50/50",
       },
       purple: {
-        bg: "bg-purple-50",
-        iconBg: "bg-purple-100",
-        icon: "text-purple-600",
         border: "border-purple-200/60",
         hover: "hover:border-purple-300/80 hover:shadow-purple-100/30",
-        gradient: "from-purple-500 to-purple-600",
-        light: "bg-purple-50/50",
       },
       orange: {
-        bg: "bg-orange-50",
-        iconBg: "bg-orange-100",
-        icon: "text-orange-600",
         border: "border-orange-200/60",
         hover: "hover:border-orange-300/80 hover:shadow-orange-100/30",
-        gradient: "from-orange-500 to-orange-600",
-        light: "bg-orange-50/50",
       },
       rose: {
-        bg: "bg-rose-50",
-        iconBg: "bg-rose-100",
-        icon: "text-rose-600",
         border: "border-rose-200/60",
         hover: "hover:border-rose-300/80 hover:shadow-rose-100/30",
-        gradient: "from-rose-500 to-rose-600",
-        light: "bg-rose-50/50",
       },
       cyan: {
-        bg: "bg-cyan-50",
-        iconBg: "bg-cyan-100",
-        icon: "text-cyan-600",
         border: "border-cyan-200/60",
         hover: "hover:border-cyan-300/80 hover:shadow-cyan-100/30",
-        gradient: "from-cyan-500 to-cyan-600",
-        light: "bg-cyan-50/50",
       },
     };
     return colors[color] || colors.blue;
@@ -189,7 +157,6 @@ export default function PropertyAmenities({
           {firstRow.map((amenity, index) => {
             const Icon = amenity.icon;
             const colors = getColorStyles(amenity.color);
-            const isHovered = hoveredId === amenity.id;
 
             return (
               <motion.div
@@ -203,18 +170,8 @@ export default function PropertyAmenities({
                   stiffness: 300,
                   damping: 25,
                 }}
-                onMouseEnter={() => setHoveredId(amenity.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                className={`group relative bg-white rounded-2xl p-6 border-2 ${colors.border} shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-400 cursor-pointer overflow-hidden hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] ${colors.hover}`}
+                className={`group relative bg-gradient-to-br ${amenity.iconBg} rounded-2xl p-6 border-2 ${colors.border} shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-400 cursor-pointer overflow-hidden hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] ${colors.hover}`}
               >
-                {/* Background Gradient on Hover */}
-                <motion.div
-                  className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${colors.gradient}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isHovered ? 1 : 0 }}
-                  transition={{ duration: 0.4 }}
-                />
-
                 {/* Popular Badge */}
                 {amenity.popular && (
                   <motion.div
@@ -238,75 +195,39 @@ export default function PropertyAmenities({
                   </motion.div>
                 )}
 
-                {/* Icon with Gradient Background */}
+                {/* Icon with White Background */}
                 <div className="relative z-10">
-                  <motion.div
-                    className={`relative w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all duration-300`}
-                    style={{
-                      background: isHovered
-                        ? "rgba(255,255,255,0.2)"
-                        : `linear-gradient(135deg, ${amenity.iconBg})`,
-                    }}
-                    animate={{
-                      scale: isHovered ? 1.1 : 1,
-                    }}
-                    transition={{ duration: 0.3 }}
+                  <div
+                    className={`relative w-16 h-16 rounded-2xl flex items-center justify-center mb-4 bg-white/20 backdrop-blur-sm`}
                   >
                     <Icon
-                      className={`w-7 h-7 transition-colors duration-300 ${
-                        isHovered ? "text-white" : colors.icon
-                      }`}
+                      className={`w-7 h-7 text-white`}
                       strokeWidth={2}
                     />
-                    {/* Glow Effect */}
-                    <div
-                      className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl`}
-                      style={{
-                        background: isHovered
-                          ? "rgba(255,255,255,0.1)"
-                          : `${colors.iconBg}30`,
-                      }}
-                    />
-                  </motion.div>
+                  </div>
 
-                  {/* Name */}
-                  <h3
-                    className={`text-sm font-bold mb-1.5 transition-colors duration-300 ${
-                      isHovered ? "text-white" : "text-gray-900"
-                    }`}
-                  >
+                  {/* Name - White */}
+                  <h3 className="text-sm font-bold mb-1.5 text-white">
                     {amenity.name}
                   </h3>
 
-                  {/* Description */}
-                  <p
-                    className={`text-xs transition-colors duration-300 ${
-                      isHovered ? "text-white/90" : "text-gray-500"
-                    }`}
-                  >
+                  {/* Description - White with opacity */}
+                  <p className="text-xs text-white/90">
                     {amenity.description}
                   </p>
 
-                  {/* Interactive Checkmark on Hover */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{
-                      opacity: isHovered ? 1 : 0,
-                      x: isHovered ? 0 : -10,
-                    }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-3"
-                  >
+                  {/* Checkmark - Always Visible */}
+                  <div className="mt-3">
                     <div className="flex items-center gap-1.5 text-white/90 text-xs font-medium">
                       <CheckCircle className="w-3.5 h-3.5" />
                       <span>Included</span>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
 
                 {/* Decorative Elements */}
-                <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-500" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 bg-white/5 rounded-full blur-3xl group-hover:w-40 group-hover:h-40 transition-all duration-700" />
+                <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-white/5 rounded-full blur-2xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
               </motion.div>
             );
           })}
@@ -317,7 +238,6 @@ export default function PropertyAmenities({
           {secondRow.map((amenity, index) => {
             const Icon = amenity.icon;
             const colors = getColorStyles(amenity.color);
-            const isHovered = hoveredId === amenity.id;
 
             return (
               <motion.div
@@ -331,17 +251,9 @@ export default function PropertyAmenities({
                   stiffness: 300,
                   damping: 25,
                 }}
-                onMouseEnter={() => setHoveredId(amenity.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                className={`group relative bg-white rounded-2xl p-6 border-2 ${colors.border} shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-400 cursor-pointer overflow-hidden hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] ${colors.hover}`}
+                className={`group relative bg-gradient-to-br ${amenity.iconBg} rounded-2xl p-6 border-2 ${colors.border} shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-400 cursor-pointer overflow-hidden hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] ${colors.hover}`}
               >
-                <motion.div
-                  className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${colors.gradient}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isHovered ? 1 : 0 }}
-                  transition={{ duration: 0.4 }}
-                />
-
+                {/* Popular Badge */}
                 {amenity.popular && (
                   <motion.div
                     initial={{ scale: 0, rotate: -180 }}
@@ -364,69 +276,39 @@ export default function PropertyAmenities({
                   </motion.div>
                 )}
 
+                {/* Icon with White Background */}
                 <div className="relative z-10">
-                  <motion.div
-                    className={`relative w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all duration-300`}
-                    style={{
-                      background: isHovered
-                        ? "rgba(255,255,255,0.2)"
-                        : `linear-gradient(135deg, ${amenity.iconBg})`,
-                    }}
-                    animate={{
-                      scale: isHovered ? 1.1 : 1,
-                    }}
-                    transition={{ duration: 0.3 }}
+                  <div
+                    className={`relative w-16 h-16 rounded-2xl flex items-center justify-center mb-4 bg-white/20 backdrop-blur-sm`}
                   >
                     <Icon
-                      className={`w-7 h-7 transition-colors duration-300 ${
-                        isHovered ? "text-white" : colors.icon
-                      }`}
+                      className={`w-7 h-7 text-white`}
                       strokeWidth={2}
                     />
-                    <div
-                      className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl`}
-                      style={{
-                        background: isHovered
-                          ? "rgba(255,255,255,0.1)"
-                          : `${colors.iconBg}30`,
-                      }}
-                    />
-                  </motion.div>
+                  </div>
 
-                  <h3
-                    className={`text-sm font-bold mb-1.5 transition-colors duration-300 ${
-                      isHovered ? "text-white" : "text-gray-900"
-                    }`}
-                  >
+                  {/* Name - White */}
+                  <h3 className="text-sm font-bold mb-1.5 text-white">
                     {amenity.name}
                   </h3>
 
-                  <p
-                    className={`text-xs transition-colors duration-300 ${
-                      isHovered ? "text-white/90" : "text-gray-500"
-                    }`}
-                  >
+                  {/* Description - White with opacity */}
+                  <p className="text-xs text-white/90">
                     {amenity.description}
                   </p>
 
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{
-                      opacity: isHovered ? 1 : 0,
-                      x: isHovered ? 0 : -10,
-                    }}
-                    transition={{ duration: 0.3 }}
-                    className="mt-3"
-                  >
+                  {/* Checkmark - Always Visible */}
+                  <div className="mt-3">
                     <div className="flex items-center gap-1.5 text-white/90 text-xs font-medium">
                       <CheckCircle className="w-3.5 h-3.5" />
                       <span>Included</span>
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
 
-                <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-500" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 bg-white/5 rounded-full blur-3xl group-hover:w-40 group-hover:h-40 transition-all duration-700" />
+                {/* Decorative Elements */}
+                <div className="absolute -bottom-8 -right-8 w-20 h-20 bg-white/5 rounded-full blur-2xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
               </motion.div>
             );
           })}
