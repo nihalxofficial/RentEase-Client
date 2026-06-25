@@ -26,7 +26,7 @@ const navLinks = [
   { name: "Home", href: "/", icon: Home },
   { name: "All Properties", href: "/properties", icon: Building2 },
   { name: "About", href: "/about", icon: Info },
-  { name: "Reviews", href: "/reviews", icon: Star },
+  // { name: "Reviews", href: "/reviews", icon: Star },
   { name: "Contact", href: "/contact", icon: Phone },
 ];
 
