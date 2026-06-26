@@ -135,10 +135,10 @@ export default function DashboardNavbar({ toggleSidebar, isSidebarOpen }) {
   };
 
   const profileLinks = [
-    { name: "Profile", href: "/dashboard/owner/profile", icon: User },
-    { name: "Dashboard", href: "/dashboard/owner", icon: LayoutDashboard },
-    { name: "My Properties", href: "/dashboard/owner/properties", icon: Building2 },
-    { name: "Settings", href: "/dashboard/owner/settings", icon: Settings },
+    { name: "Profile", href: "/profile", icon: User },
+    { name: "Dashboard", href: `/dashboard/${user?.role}`, icon: LayoutDashboard },
+    // { name: "My Properties", href: "/dashboard/owner/properties", icon: Building2 },
+    { name: "Settings", href: `/dashboard/${user?.role}/settings`, icon: Settings },
   ];
 
   const currentTitle = pageTitles[pathname] || "Dashboard";

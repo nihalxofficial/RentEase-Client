@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  User,
   X,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
@@ -53,6 +54,12 @@ export default function OwnerSidebar({ isOpen = true }) {
       exact: true,
     },
     {
+      name: "Profile",
+      href: "/profile",
+      icon: User,
+      exact: true,
+    },
+    {
       name: "Settings",
       href: "/dashboard/owner/settings",
       icon: Settings,
@@ -83,10 +90,10 @@ export default function OwnerSidebar({ isOpen = true }) {
 
   const NavItem = ({ item }) => {
     // Check exact match or starts with for sub-routes
-    const isActive = item.exact 
-      ? pathname === item.href 
+    const isActive = item.exact
+      ? pathname === item.href
       : pathname?.startsWith(item.href + '/') || pathname === item.href;
-    
+
     const Icon = item.icon;
 
     return (
@@ -95,8 +102,8 @@ export default function OwnerSidebar({ isOpen = true }) {
         onClick={() => setIsMobileOpen(false)}
         className={`
           flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-          ${isActive 
-            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-[0_4px_14px_rgba(37,99,235,0.3)]" 
+          ${isActive
+            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-[0_4px_14px_rgba(37,99,235,0.3)]"
             : "text-gray-600 hover:text-blue-700 hover:bg-blue-50/80"
           }
         `}

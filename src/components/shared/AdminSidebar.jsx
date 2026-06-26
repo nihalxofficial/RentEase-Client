@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   Shield,
+  User,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
@@ -61,6 +62,12 @@ export default function AdminSidebar({ isOpen = true }) {
       exact: true,
     },
     {
+      name: "Profile",
+      href: "/profile",
+      icon: User,
+      exact: true,
+    },
+    {
       name: "Settings",
       href: "/dashboard/admin/settings",
       icon: Settings,
@@ -100,8 +107,8 @@ export default function AdminSidebar({ isOpen = true }) {
         onClick={() => setIsMobileOpen(false)}
         className={`
           flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-          ${isActive 
-            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-[0_4px_14px_rgba(37,99,235,0.3)]" 
+          ${isActive
+            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-[0_4px_14px_rgba(37,99,235,0.3)]"
             : "text-gray-600 hover:text-blue-700 hover:bg-blue-50/80"
           }
         `}
