@@ -33,9 +33,6 @@ export default async function Success({ searchParams }) {
   if (status === 'complete') {
     // Api call for Post subscription and change user plan
     const bookingResult = await addBooking({...metadata, session_id});
-    console.log(bookingResult);
-
-    // await updateBookingStatus(bookingId, 'completed');
 
     const formattedAmount = new Intl.NumberFormat('en-US', {
       style: 'currency',

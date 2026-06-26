@@ -5,16 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeSlash } from "@gravity-ui/icons";
-import {
-  Form,
-  Input,
-  Label,
-  TextField,
-  Button,
-  FieldError,
+import { 
+  Form, 
+  Input, 
+  Label, 
+  TextField, 
+  Button, 
+  FieldError, 
+  Description,
   InputGroup,
 } from "@heroui/react";
-import {
+import { 
+  User,
   Mail,
   Lock,
   Sparkles,
@@ -23,49 +25,64 @@ import {
   Home,
   Users,
   Building2,
-  LogIn,
+  Image as ImageIcon,
 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 
-// ==================== LOGIN PAGE ====================
-export default function LoginClient() {
+// ==================== REGISTER PAGE ====================
+export default function RegisterClient() {
   const router = useRouter();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     const formData = new FormData(e.currentTarget);
     const userData = Object.fromEntries(formData.entries());
-    const {email, password} = userData
+    const {email, password, image, name} = userData;
 
-    const { data, error } = await authClient.signIn.email({
-      email,
-      password,
-      rememberMe: true,
-    });
+    const { data, error } = await authClient.signUp.email({
+        email, 
+        password,
+        name,
+        image,
+    })
 
     if(data){
-      toast.success("Login Successful🎉")
+      toast.success("Registration Successful🎉");
       router.push("/")
     }
-
     if(error){
-      toast.error(error.message)
+      toast.error(error.message);
     }
-    console.log(data);
-
     setIsLoading(false);
   };
 
-  const validateEmail = (value) => {
-    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
-      return "Please enter a valid email address";
+  const validatePassword = (value) => {
+    if (value.length < 8) {
+      return "Password must be at least 8 characters";
+    }
+    if (!/[A-Z]/.test(value)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!/[0-9]/.test(value)) {
+      return "Password must contain at least one number";
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+      return "Password must contain at least one special character";
+    }
+    return null;
+  };
+
+  const validateConfirmPassword = (value) => {
+    const password = document.querySelector('input[name="password"]')?.value;
+    if (value !== password) {
+      return "Passwords do not match";
     }
     return null;
   };
@@ -92,14 +109,14 @@ export default function LoginClient() {
             <div className="absolute inset-0">
               <Image
                 src="https://media.istockphoto.com/id/511061090/photo/business-office-building-in-london-england.jpg?s=612x612&w=0&k=20&c=nYAn4JKoCqO1hMTjZiND1PAIWoABuy1BwH1MhaEoG6w="
-                alt="Login"
+                alt="Register"
                 fill
                 className="object-cover"
                 sizes="50vw"
                 quality={90}
                 priority
               />
-              {/* Overlay for text visibility */}
+              {/* Increased overlay for better text visibility */}
               <div className="absolute inset-0 bg-linear-to-br from-blue-600/70 via-blue-700/60 to-blue-800/70" />
             </div>
 
@@ -117,7 +134,7 @@ export default function LoginClient() {
               >
                 <Sparkles className="w-4 h-4 text-white" />
                 <span className="text-white font-semibold text-xs uppercase tracking-widest">
-                  Welcome Back
+                  Join Us Today
                 </span>
               </motion.div>
 
@@ -128,10 +145,10 @@ export default function LoginClient() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="text-4xl font-extrabold mb-4"
               >
-                Welcome Back
+                Start Your Journey
                 <br />
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-100 to-blue-400">
-                  To RentEase
+                  With RentEase
                 </span>
               </motion.h2>
 
@@ -142,7 +159,7 @@ export default function LoginClient() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="text-white/90 text-base max-w-sm mb-8"
               >
-                Sign in to your account and continue your journey to finding the perfect home.
+                Create your account and unlock a world of premium rental properties. Find your dream home with ease.
               </motion.p>
 
               {/* Features */}
@@ -204,98 +221,175 @@ export default function LoginClient() {
 
             <div className="mb-8">
               <h1 className="text-3xl font-extrabold text-gray-900">
-                Welcome Back
+                Create Account
               </h1>
               <p className="text-gray-500 mt-2">
-                Sign in to your account to continue
+                Join thousands of happy users on RentEase
               </p>
             </div>
 
-            <Form
+            <Form 
               className="flex flex-col gap-5"
               onSubmit={handleSubmit}
             >
-              {/* Email Field */}
-              <TextField
-                isRequired
-                name="email"
-                type="email"
-                validate={validateEmail}
-              >
-                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-blue-600" strokeWidth={2} />
-                  Email Address
-                </Label>
-                <Input
-                  placeholder="john@example.com"
-                  className="w-full"
-                  classNames={{
-                    input: "bg-transparent text-gray-800 placeholder:text-gray-400",
-                    inputWrapper: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+              {/* Name & Email - Side by Side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TextField
+                  isRequired
+                  name="name"
+                  validate={(value) => {
+                    if (value.length < 2) {
+                      return "Name must be at least 2 characters";
+                    }
+                    return null;
                   }}
-                />
-                <FieldError />
-              </TextField>
-
-              {/* Password Field with Toggle */}
-              <TextField
-                isRequired
-                name="password"
-                type={isPasswordVisible ? "text" : "password"}
-                validate={(value) => {
-                  if (value.length < 1) {
-                    return "Please enter your password";
-                  }
-                  return null;
-                }}
-              >
-                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-blue-600" strokeWidth={2} />
-                  Password
-                </Label>
-                <InputGroup>
-                  <InputGroup.Input
-                    placeholder="Enter your password"
+                >
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <User className="w-4 h-4 text-blue-600" strokeWidth={2} />
+                    Full Name
+                  </Label>
+                  <Input
+                    placeholder="John Doe"
                     className="w-full"
                     classNames={{
                       input: "bg-transparent text-gray-800 placeholder:text-gray-400",
                       inputWrapper: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
                     }}
                   />
-                  <InputGroup.Suffix className="pr-1">
-                    <Button
-                      isIconOnly
-                      aria-label={isPasswordVisible ? "Hide password" : "Show password"}
-                      size="sm"
-                      variant="ghost"
-                      onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                      className="cursor-pointer text-gray-400 hover:text-gray-600"
-                    >
-                      {isPasswordVisible ? <Eye className="w-4 h-4" /> : <EyeSlash className="w-4 h-4" />}
-                    </Button>
-                  </InputGroup.Suffix>
-                </InputGroup>
+                  <FieldError />
+                </TextField>
+
+                <TextField
+                  isRequired
+                  name="email"
+                  type="email"
+                  validate={(value) => {
+                    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
+                      return "Please enter a valid email address";
+                    }
+                    return null;
+                  }}
+                >
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-blue-600" strokeWidth={2} />
+                    Email Address
+                  </Label>
+                  <Input
+                    placeholder="john@example.com"
+                    className="w-full"
+                    classNames={{
+                      input: "bg-transparent text-gray-800 placeholder:text-gray-400",
+                      inputWrapper: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+                    }}
+                  />
+                  <FieldError />
+                </TextField>
+              </div>
+
+              {/* Password & Confirm Password - Side by Side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <TextField
+                  isRequired
+                  minLength={8}
+                  name="password"
+                  type={isPasswordVisible ? "text" : "password"}
+                  validate={validatePassword}
+                >
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-blue-600" strokeWidth={2} />
+                    Password
+                  </Label>
+                  <InputGroup>
+                    <InputGroup.Input
+                      placeholder="Enter your password"
+                      className="w-full"
+                      classNames={{
+                        input: "bg-transparent text-gray-800 placeholder:text-gray-400",
+                        inputWrapper: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+                      }}
+                    />
+                    <InputGroup.Suffix className="pr-1">
+                      <Button
+                        isIconOnly
+                        aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                        className="cursor-pointer text-gray-400 hover:text-gray-600"
+                      >
+                        {isPasswordVisible ? <Eye className="w-4 h-4" /> : <EyeSlash className="w-4 h-4" />}
+                      </Button>
+                    </InputGroup.Suffix>
+                  </InputGroup>
+                  <Description className="text-xs text-gray-400">
+                    Must be at least 8 characters
+                  </Description>
+                  <FieldError />
+                </TextField>
+
+                <TextField
+                  isRequired
+                  name="confirmPassword"
+                  type={isConfirmPasswordVisible ? "text" : "password"}
+                  validate={validateConfirmPassword}
+                >
+                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-blue-600" strokeWidth={2} />
+                    Confirm Password
+                  </Label>
+                  <InputGroup>
+                    <InputGroup.Input
+                      placeholder="Confirm your password"
+                      className="w-full"
+                      classNames={{
+                        input: "bg-transparent text-gray-800 placeholder:text-gray-400",
+                        inputWrapper: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+                      }}
+                    />
+                    <InputGroup.Suffix className="pr-1">
+                      <Button
+                        isIconOnly
+                        aria-label={isConfirmPasswordVisible ? "Hide password" : "Show password"}
+                        size="sm"
+                        variant="ghost"
+                        onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                        className="cursor-pointer text-gray-400 hover:text-gray-600"
+                      >
+                        {isConfirmPasswordVisible ? <Eye className="w-4 h-4" /> : <EyeSlash className="w-4 h-4" />}
+                      </Button>
+                    </InputGroup.Suffix>
+                  </InputGroup>
+                  <FieldError />
+                </TextField>
+              </div>
+
+              {/* Image URL Field - Full Width */}
+              <TextField
+                name="image"
+                validate={(value) => {
+                  if (value && !/^https?:\/\/.+\..+/.test(value)) {
+                    return "Please enter a valid image URL";
+                  }
+                  return null;
+                }}
+              >
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-blue-600" strokeWidth={2} />
+                  Profile Image URL
+                </Label>
+                <Input
+                  placeholder="https://example.com/avatar.jpg"
+                  className="w-full"
+                  classNames={{
+                    input: "bg-transparent text-gray-800 placeholder:text-gray-400",
+                    inputWrapper: "bg-gray-50/80 border-2 border-blue-100/50 rounded-xl focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-200 shadow-sm hover:border-blue-300",
+                  }}
+                />
+                <Description className="text-xs text-gray-400">
+                  Optional: Enter a URL for your profile picture
+                </Description>
                 <FieldError />
               </TextField>
-
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-600">Remember me</span>
-                </label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
-                >
-                  Forgot password?
-                </Link>
-              </div>
 
               {/* Submit Button */}
               <Button
@@ -306,21 +400,21 @@ export default function LoginClient() {
                 {isLoading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Signing In...</span>
+                    <span>Creating Account...</span>
                   </>
                 ) : (
                   <>
-                    <span>Sign In</span>
-                    <LogIn className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={2} />
+                    <span>Create Account</span>
+                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={2} />
                   </>
                 )}
               </Button>
             </Form>
 
             <p className="text-center text-sm text-gray-500 mt-6">
-              Don&apos;t have an account?{' '}
-              <Link href="/auth/register" className="text-blue-600 font-semibold hover:text-blue-700 transition-colors">
-                Create Account
+              Already have an account?{' '}
+              <Link href="/auth/login" className="text-blue-600 font-semibold hover:text-blue-700 transition-colors">
+                Sign In
               </Link>
             </p>
 
@@ -341,13 +435,13 @@ export default function LoginClient() {
                 <span className="text-lg font-bold text-blue-600">G</span>
                 <span className="text-sm font-medium text-gray-700">Google</span>
               </Button>
-              <Button
+              {/* <Button
                 variant="secondary"
                 className="flex-1 cursor-pointer bg-gray-50 border-2 border-gray-200 rounded-xl py-3 hover:bg-gray-100 transition-colors"
               >
                 <span className="text-lg font-bold text-blue-600">f</span>
                 <span className="text-sm font-medium text-gray-700">Facebook</span>
-              </Button>
+              </Button> */}
             </div>
           </div>
         </motion.div>

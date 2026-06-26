@@ -1,4 +1,3 @@
-// src/components/dashboard/DashboardLayout.jsx
 "use client";
 
 import { useState, useEffect } from "react";
