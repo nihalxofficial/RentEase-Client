@@ -48,7 +48,7 @@ export default function TenantSidebar({ isOpen = true }) {
     },
     {
       name: "Profile",
-      href: "/dashboard/tenant/profile",
+      href: "/profile",
       icon: User,
       exact: true,
     },
