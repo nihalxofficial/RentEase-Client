@@ -5,12 +5,10 @@ export const addBooking = async(data)=>{
 }
 
 export const approveBooking = async(id, data)=>{
-    return
-    // return serverMutation(`/bookings/${id}`, data)
+    return serverMutation(`/bookings/${id}`, data, "PATCH")
 }
 
 export const rejectBooking = async(id, data)=>{
-    return
-    // return serverMutation(`/bookings/${id}`, data)
+    return serverMutation(`/bookings/${id}`, data, "PATCH")
 }
 
