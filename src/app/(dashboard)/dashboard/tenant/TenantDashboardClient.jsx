@@ -654,7 +654,7 @@ export default function TenantDashboardClient({
                     <div className="flex items-center gap-2 text-xs text-gray-400">
                       <span className="flex items-center gap-0.5"><Bed className="w-3 h-3" />{favorite.bedrooms || 0}</span>
                       <span className="flex items-center gap-0.5"><Bath className="w-3 h-3" />{favorite.bathrooms || 0}</span>
-                      <span className="flex items-center gap-0.5">{favorite.propertySize || 0} sqft</span>
+                      <span className="flex items-center gap-0.5 whitespace-nowrap">{favorite.propertySize || 0} sqft</span>
                     </div>
                   </td>
                   <td className="py-3 px-4">

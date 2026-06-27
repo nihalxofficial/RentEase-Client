@@ -10,3 +10,7 @@ export const getFeaturedProperties = async(status="approved")=>{
 export const getPropertyById = async(id)=>{
     return serverFetch(`/properties/${id}`)
 }
+
+export const getPropertiesByOwner = async(id)=>{
+    return serverFetch(`/properties?ownerId=${id}`)
+}

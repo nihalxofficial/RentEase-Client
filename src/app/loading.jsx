@@ -87,14 +87,14 @@ export default function Loading() {
         >
           <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
             <Sparkles className="w-3 h-3 text-blue-400" />
-            Finding your dream property
+            Finding your dream home
           </p>
-          <div className="flex justify-center gap-4">
+          {/* <div className="flex justify-center gap-4">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-full text-xs text-gray-500 border border-gray-100">
               <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
               Loading
             </span>
-          </div>
+          </div> */}
         </motion.div>
       </motion.div>
     </div>

@@ -287,7 +287,7 @@ export default function Navbar() {
                           <span>Dashboard</span>
                         </Link>
                         <Link
-                          href="/settings"
+                          href={`/dashboard/${user?.role}/settings`}
                           className="flex items-center gap-3.5 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
                           onClick={() => setIsDropdownOpen(false)}
                         >
@@ -297,7 +297,7 @@ export default function Navbar() {
                         <div className="border-t border-gray-100 mt-1.5 pt-1.5">
                           <button
                             onClick={handleLogout}
-                            className="flex cursor-pointer items-center gap-3.5 px-5 py-2.5 w-full text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                            className="flex items-center gap-3.5 px-5 py-2.5 w-full text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                           >
                             <LogOut className="w-4 h-4" strokeWidth={2.2} />
                             <span>Logout</span>
