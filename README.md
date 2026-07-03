@@ -1,6 +1,6 @@
-# RentEase — Property Rental & Booking Platform (Client)
+# RentEase — Property Rental & Booking Platform
 
-RentEase is a full-stack property rental and booking platform where tenants can discover, favourite, and book rental properties, owners can list and manage their properties, and admins can moderate the entire platform. This repository contains the **frontend (client-side)** codebase built with Next.js.
+RentEase is a full-stack property rental and booking platform where tenants can discover, favourite and book rental properties, owners can list and manage their properties and admins can moderate the entire platform. This repository contains the **frontend (client-side)** codebase built with Next.js.
 
 🌐 **Live URL:** [https://rentease-flash.vercel.app](https://rentease-flash.vercel.app)
 
@@ -11,16 +11,16 @@ RentEase is a full-stack property rental and booking platform where tenants can 
 ## Key Features
 
 ### Authentication & Authorisation
-- Email/password registration with name, photo, and secure password
+- Email/password registration with name, photo and secure password
 - Google Social Login (role auto-assigned as Tenant)
 - JWT-based authentication on all protected routes
-- Role-based route protection for Tenant, Owner, and Admin
+- Role-based route protection for Tenant, Owner and Admin
 - Private routes stay accessible on page reload without redirecting to Login
 
 ### Public Pages
-- **Home Page** — animated banner with search (Location, Property Type, Min/Max Price), featured properties (6 via DB limit), Why Choose Us, dynamic customer reviews, and extra sections (Top Locations, Rental Stats, Recently Added)
-- **All Properties Page** — 3-column grid of approved properties with search by location, filter by property type, and price sorting (low→high / high→low) — all handled on the backend
-- Framer Motion animations on banner, featured properties, and review sections
+- **Home Page** — animated banner with search (Location, Property Type, Min/Max Price), featured properties (6 via DB limit), Why Choose Us, dynamic customer reviews and extra sections (Top Locations, Rental Stats, Recently Added)
+- **All Properties Page** — 3-column grid of approved properties with search by location, filter by property type and price sorting (low→high / high→low) — all handled on the backend
+- Framer Motion animations on banner, featured properties and review sections
 
 ### Property Details (Private)
 - Add to Favourites (saved to DB, visible in Tenant Dashboard)
