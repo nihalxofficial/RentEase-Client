@@ -55,7 +55,6 @@ RentEase is a full-stack property rental and booking platform where tenants can 
 - Fully responsive — mobile, tablet and desktop
 - Consistent colour theme and typography across all pages and dashboard
 - Uniform card/grid layout with equal image sizes
-- Dark / Light theme toggle via next-themes
 - Loading page and custom Error page
 - Framer Motion animations throughout
 - Pagination on minimum 2 pages
