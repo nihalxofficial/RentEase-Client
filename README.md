@@ -6,11 +6,15 @@ RentEase is a full-stack property rental and booking platform where tenants can 
 
 📁 **Server Repository:** [https://github.com/nihalxofficial/RentEase-Server](https://github.com/nihalxofficial/RentEase-Server)
 
+🐳 **Docker Images:**
+- Client: [hub.docker.com/r/nihalxofficial/rentease-client](https://hub.docker.com/r/nihalxofficial/rentease-client)
+- Server: [hub.docker.com/r/nihalxofficial/rentease-server](https://hub.docker.com/r/nihalxofficial/rentease-server)
+
 ---
 
 ## Key Features
 
-### Authentication & Authorisation
+### Authentication & Authorization
 - Email/password registration with name, photo and secure password
 - Google Social Login (role auto-assigned as Tenant)
 - JWT-based authentication on all protected routes
@@ -48,7 +52,7 @@ RentEase is a full-stack property rental and booking platform where tenants can 
 - Transactions — Transaction ID, Property Name, Tenant Name, Owner Name, Amount, Date
 
 ### UI/UX
-- Fully responsive — mobile, tablet, and desktop
+- Fully responsive — mobile, tablet and desktop
 - Consistent colour theme and typography across all pages and dashboard
 - Uniform card/grid layout with equal image sizes
 - Dark / Light theme toggle via next-themes
@@ -76,6 +80,7 @@ RentEase is a full-stack property rental and booking platform where tenants can 
 | `recharts` | Line charts for Owner analytics dashboard |
 | `@stripe/stripe-js` | Stripe payment integration (client-side) |
 | `react-toast` | Toast notifications |
+| `docker` | Containerized deployment for consistent environments |
 
 ---
 
@@ -101,18 +106,31 @@ src/
 Create a `.env.local` file in the project root:
 
 ```env
+# Used server-side (API routes, server components, server actions)
+API_URL=your_server_base_url
+
+# Used in the browser (client components) — must be reachable from the user's machine
 NEXT_PUBLIC_API_URL=your_server_base_url
+
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
 BETTER_AUTH_SECRET=your_auth_secret
 BETTER_AUTH_URL=your_app_url
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+DISCORD_CLIENT_ID=your_discord_client_id
+DISCORD_CLIENT_SECRET=your_discord_client_secret
+MONGO_URI=your_mongodb_atlas_connection_string
 ```
 
 > Never commit `.env.local` to version control.
+>
+> ⚠️ `NEXT_PUBLIC_*` variables are baked into the JavaScript bundle at **build time**. If you change one, rebuild the app (or Docker image) rather than just restarting it.
 
 ---
 
-## Getting Started
+## Getting Started (Without Docker)
 
 ```bash
 # Clone the repository
@@ -127,3 +145,79 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## Running with Docker
+
+### Option A — Pull the pre-built image from Docker Hub
+
+No need to clone the repo or install Node — just pull and run the published image directly.
+
+```bash
+# Pull the image
+docker pull nihalxofficial/rentease-client:v1
+
+# Run it, passing in your environment variables
+docker run -d \
+  -p 3000:3000 \
+  --env-file .env.local \
+  --name rentease-client \
+  nihalxofficial/rentease-client:v1
+```
+
+Make sure you have a local `.env.local` file (same folder you run this command from) containing the variables listed above before running this. Since `NEXT_PUBLIC_*` values are baked in at build time, the published image already has whatever values were set when it was built — passing `--env-file` here only affects server-side variables read at runtime (like `API_URL`, `MONGO_URI`, `BETTER_AUTH_SECRET`), not the `NEXT_PUBLIC_*` ones.
+
+The client will be available at [http://localhost:3000](http://localhost:3000).
+
+**Useful commands:**
+```bash
+docker ps                       # confirm it's running
+docker logs -f rentease-client  # view logs
+docker stop rentease-client     # stop the container
+docker rm rentease-client       # remove the container
+```
+
+### Option B — Build the image yourself from source
+
+```bash
+git clone https://github.com/nihalxofficial/RentEase-Client.git
+cd RentEase-Client
+
+docker build -t rentease-client .
+docker run -d -p 3000:3000 --env-file .env.local --name rentease-client rentease-client
+```
+
+Building it yourself lets your own `.env.local` values (including `NEXT_PUBLIC_*` ones) get baked into the image at build time.
+
+### Option C — Run client + server together with Docker Compose
+
+Pull both pre-built images from Docker Hub and run them together with a single `docker-compose.yml`:
+
+```yaml
+version: "3.9"
+
+services:
+  client:
+    image: nihalxofficial/rentease-client:v1
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./client.env.local
+    depends_on:
+      - server
+
+  server:
+    image: nihalxofficial/rentease-server:v1
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server.env
+```
+
+Then run:
+```bash
+docker compose up -d
+```
+
+This starts both containers on the same internal Docker network, so the client can reach the server at `http://server:5000` for server-side calls, while the browser continues to use `http://localhost:5000` (or your deployed server URL) for client-side calls.
