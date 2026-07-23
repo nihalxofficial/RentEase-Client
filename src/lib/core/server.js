@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { getToken } from "./session";
 
 const Api = process.env.NEXT_PUBLIC_API_URL
+// const Api = typeof window === "undefined"
+//   ? process.env.API_URL
+//   : process.env.NEXT_PUBLIC_API_URL
 
 const handleResponse = async (res) => {
     if (res.status === 401) redirect("/auth/login");
@@ -30,6 +33,9 @@ export const serverFetch = async (path, requireAuth = false) => {
 
 export const serverMutation = async (path, data="", method = "POST") => {
     const token = await getToken()
+    if (!token) {
+        throw new Error("UNAUTHORIZED");
+    }
     try {
         const res = await fetch(`${Api}${path}`, {
             method: method,

@@ -1,6 +1,7 @@
 import { serverMutation } from "../core/server"
 
 export const addToWishlist = async(wish)=>{
+  // console.log(wish);
     return serverMutation(`/wishlist`, wish)
 }
 

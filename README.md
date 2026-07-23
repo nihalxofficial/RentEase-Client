@@ -22,6 +22,7 @@
 
 ## 📑 Table of Contents
 
+<<<<<<< HEAD
 - [About](#-about)
 - [Project Overview](#-project-overview)
   - [Objective](#objective)
@@ -36,6 +37,53 @@
 - [Running with Docker](#-running-with-docker)
 - [Roadmap](#-roadmap)
 - [License](#-license)
+=======
+### Authentication & Authorization
+- Email/password registration with name, photo and secure password
+- Google Social Login (role auto-assigned as Tenant)
+- JWT-based authentication on all protected routes
+- Role-based route protection for Tenant, Owner, and Admin
+- Private routes stay accessible on page reload without redirecting to Login
+
+### Public Pages
+- **Home Page** — animated banner with search (Location, Property Type, Min/Max Price), featured properties (6 via DB limit), Why Choose Us, dynamic customer reviews, and extra sections (Top Locations, Rental Stats, Recently Added)
+- **All Properties Page** — 3-column grid of approved properties with search by location, filter by property type, and price sorting (low→high / high→low) — all handled on the backend
+- Framer Motion animations on banner, featured properties, and review sections
+
+### Property Details (Private)
+- Add to Favourites (saved to DB, visible in Tenant Dashboard)
+- Book Property modal — Move-in Date, Contact Number, additional notes
+- Stripe payment integration — creates booking record and transaction on success
+- Booking status flow: Pending → Approved / Rejected
+- Review system — star rating + written review with name, email, date display
+
+### Tenant Dashboard
+- My Bookings — table with property name, booking date, amount paid, booking status, payment status
+- Favourites — saved properties with Remove action
+- Profile page
+
+### Owner Dashboard
+- Analytics cards — Total Earnings, Total Properties, Total Bookings
+- Monthly Earnings chart (Recharts line chart, last 12 months)
+- Add Property — full form with title, description, location, type, pricing (rent type: Monthly/Weekly/Daily), bedrooms, bathrooms, size, amenities, images
+- My Properties — table with Update/Delete actions, status column (Pending/Approved/Rejected), rejection feedback viewable via status button
+- Booking Requests — Approve or Reject incoming bookings
+
+### Admin Dashboard
+- All Users — full users table with Change Role action
+- All Properties — Approve, Reject (with feedback modal), Update, Delete
+- All Bookings — platform-wide booking activity monitor
+- Transactions — Transaction ID, Property Name, Tenant Name, Owner Name, Amount, Date
+
+### UI/UX
+- Fully responsive — mobile, tablet, and desktop
+- Consistent colour theme and typography across all pages and dashboard
+- Uniform card/grid layout with equal image sizes
+- Dark / Light theme toggle via next-themes
+- Loading page and custom Error page
+- Framer Motion animations throughout
+- Pagination on minimum 2 pages
+>>>>>>> 2d5c4e2 (Favicon added)
 
 ---
 

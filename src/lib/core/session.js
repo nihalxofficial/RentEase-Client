@@ -14,7 +14,7 @@ export const getToken = async()=>{
   const token = await auth.api.getToken({
     headers: await headers(),
   });
-  return token ? token.token : {}
+  return token ? token.token : null
 }
 
 
