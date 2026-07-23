@@ -109,8 +109,8 @@ export default function ProfileClient({ user }) {
   };
 
   const handleLogout = async () => {
-    // Logout logic
-    router.push("/auth/logout");
+    await authClient.signOut();
+    router.push("/");
   };
 
   const formatDate = (date) => {

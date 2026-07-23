@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -21,6 +21,7 @@ import { authClient } from "@/lib/auth-client";
 
 // ==================== OWNER SIDEBAR ====================
 export default function OwnerSidebar({ isOpen = true }) {
+  const router = useRouter()
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -72,6 +73,7 @@ export default function OwnerSidebar({ isOpen = true }) {
 
   const handleLogout = async () => {
     await authClient.signOut();
+    router.push("/");
   };
 
   const getUserInitials = (name) => {
