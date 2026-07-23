@@ -25,6 +25,7 @@ import {
   Clock,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { authClient } from "@/lib/auth-client";
 
 // ==================== PROFILE CLIENT ====================
 export default function ProfileClient({ user }) {
